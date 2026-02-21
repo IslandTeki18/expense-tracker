@@ -19,15 +19,15 @@
 
 ## 1) Convex setup
 
-- [ ] Install Convex and initialize project
-  - [ ] `npx convex dev` runs successfully
-  - [ ] Convex dashboard reachable
-- [ ] Wire Convex client into Next.js
-  - [ ] Provider added in `app/layout.tsx`
-  - [ ] Basic test query renders in a page (temporary)
-- [ ] Define env vars
-  - [ ] Convex deployment URL/keys configured locally
-  - [ ] Convex deployment URL/keys configured in Vercel (later)
+- [x] Install Convex and initialize project
+  - [x] `npx convex dev` runs successfully
+  - [x] Convex dashboard reachable
+- [x] Wire Convex client into Next.js
+  - [x] Provider added in `app/layout.tsx`
+  - [x] Basic test query renders in a page (temporary)
+- [x] Define env vars
+  - [x] Convex deployment URL/keys configured locally
+  - [x] Convex deployment URL/keys configured in Vercel (later)
 
 ## 2) Core utilities (money + validation)
 
