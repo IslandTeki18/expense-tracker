@@ -3,30 +3,56 @@
 import { useState, useEffect, useCallback } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { parseMoneyToCents } from "@/lib/money";
 import { validateIncome, validateExpense } from "@/lib/validation";
 import type { TxnType, Person } from "@/lib/types";
 
+interface EditData {
+  transactionId: Id<"transactions">;
+  amountCents: number;
+  entryDate: string;
+  description: string | null;
+  spentBy: Person | null;
+  enteredBy: Person;
+}
+
 interface TransactionFormModalProps {
   mode: TxnType;
   onClose: () => void;
+  editData?: EditData;
 }
 
 export default function TransactionFormModal({
   mode,
   onClose,
+  editData,
 }: TransactionFormModalProps) {
-  const [amount, setAmount] = useState("");
-  const [entryDate, setEntryDate] = useState("");
-  const [description, setDescription] = useState("");
-  const [enteredBy, setEnteredBy] = useState<Person>("you");
-  const [spentBy, setSpentBy] = useState<Person>("you");
+  const isEdit = !!editData;
+
+  const [amount, setAmount] = useState(() =>
+    editData ? (editData.amountCents / 100).toFixed(2) : "",
+  );
+  const [entryDate, setEntryDate] = useState(() =>
+    editData?.entryDate ?? "",
+  );
+  const [description, setDescription] = useState(() =>
+    editData?.description ?? "",
+  );
+  const [enteredBy, setEnteredBy] = useState<Person>(() =>
+    editData?.enteredBy ?? "you",
+  );
+  const [spentBy, setSpentBy] = useState<Person>(() =>
+    editData?.spentBy ?? "you",
+  );
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const createIncome = useMutation(api.transactions.createIncome);
   const createExpense = useMutation(api.transactions.createExpense);
+  const editIncomeMutation = useMutation(api.transactions.editIncome);
+  const editExpenseMutation = useMutation(api.transactions.editExpense);
 
   const handleClose = useCallback(() => {
     if (!isSubmitting) onClose();
@@ -70,12 +96,22 @@ export default function TransactionFormModal({
 
       setIsSubmitting(true);
       try {
-        await createIncome({
-          amountCents,
-          entryDate,
-          enteredBy,
-          description: trimmedDesc || null,
-        });
+        if (isEdit) {
+          await editIncomeMutation({
+            transactionId: editData.transactionId,
+            amountCents,
+            entryDate,
+            enteredBy,
+            description: trimmedDesc || null,
+          });
+        } else {
+          await createIncome({
+            amountCents,
+            entryDate,
+            enteredBy,
+            description: trimmedDesc || null,
+          });
+        }
         onClose();
       } catch (err) {
         setSubmitError(
@@ -99,13 +135,24 @@ export default function TransactionFormModal({
 
       setIsSubmitting(true);
       try {
-        await createExpense({
-          amountCents,
-          entryDate,
-          enteredBy,
-          description: trimmedDesc,
-          spentBy,
-        });
+        if (isEdit) {
+          await editExpenseMutation({
+            transactionId: editData.transactionId,
+            amountCents,
+            entryDate,
+            enteredBy,
+            description: trimmedDesc,
+            spentBy,
+          });
+        } else {
+          await createExpense({
+            amountCents,
+            entryDate,
+            enteredBy,
+            description: trimmedDesc,
+            spentBy,
+          });
+        }
         onClose();
       } catch (err) {
         setSubmitError(
@@ -115,6 +162,20 @@ export default function TransactionFormModal({
       }
     }
   }
+
+  const title = isEdit
+    ? mode === "income"
+      ? "Edit Income"
+      : "Edit Expense"
+    : mode === "income"
+      ? "Add Income"
+      : "Add Expense";
+
+  const submitLabel = isEdit
+    ? "Save Changes"
+    : mode === "income"
+      ? "Add Income"
+      : "Add Expense";
 
   return (
     <div
@@ -126,9 +187,7 @@ export default function TransactionFormModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {mode === "income" ? "Add Income" : "Add Expense"}
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
           <button
             type="button"
             onClick={handleClose}
@@ -265,11 +324,7 @@ export default function TransactionFormModal({
             disabled={isSubmitting}
             className={`w-full rounded px-4 py-2 font-medium text-white disabled:opacity-50 ${mode === "income" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}`}
           >
-            {isSubmitting
-              ? "Saving..."
-              : mode === "income"
-                ? "Add Income"
-                : "Add Expense"}
+            {isSubmitting ? "Saving..." : submitLabel}
           </button>
         </form>
       </div>

@@ -110,6 +110,107 @@ export const listTransactionHistory = query({
   },
 });
 
+export const editIncome = mutation({
+  args: {
+    transactionId: v.id("transactions"),
+    amountCents: v.number(),
+    entryDate: v.string(),
+    enteredBy: v.union(v.literal("you"), v.literal("wife")),
+    description: v.optional(v.union(v.string(), v.null())),
+  },
+  handler: async (
+    ctx,
+    { transactionId, amountCents, entryDate, enteredBy, description },
+  ) => {
+    const txn = await ctx.db.get(transactionId);
+    if (!txn) throw new Error("Transaction not found");
+    if (txn.type !== "income")
+      throw new Error("Cannot edit expense as income");
+
+    assertPositiveCents(amountCents);
+    assertValidDate(entryDate);
+
+    const oldActiveVersionId = txn.activeVersionId;
+    const now = Date.now();
+
+    const newVersionId = await ctx.db.insert("transaction_versions", {
+      transactionId,
+      type: "income",
+      amountCents,
+      entryDate,
+      description: description ?? null,
+      spentBy: null,
+      enteredBy,
+      receiptFileId: null,
+      createdAt: now,
+      supersedesVersionId: oldActiveVersionId,
+    });
+
+    await ctx.db.patch(transactionId, {
+      activeVersionId: newVersionId,
+      updatedAt: now,
+    });
+
+    return newVersionId;
+  },
+});
+
+export const editExpense = mutation({
+  args: {
+    transactionId: v.id("transactions"),
+    amountCents: v.number(),
+    entryDate: v.string(),
+    description: v.string(),
+    spentBy: v.union(v.literal("you"), v.literal("wife")),
+    enteredBy: v.union(v.literal("you"), v.literal("wife")),
+  },
+  handler: async (
+    ctx,
+    { transactionId, amountCents, entryDate, description, spentBy, enteredBy },
+  ) => {
+    const txn = await ctx.db.get(transactionId);
+    if (!txn) throw new Error("Transaction not found");
+    if (txn.type !== "expense")
+      throw new Error("Cannot edit income as expense");
+
+    assertPositiveCents(amountCents);
+    assertValidDate(entryDate);
+    assertNonEmpty(description, "description");
+
+    const oldActiveVersionId = txn.activeVersionId;
+    const now = Date.now();
+
+    // Carry forward receiptFileId from old active version
+    let receiptFileId = null;
+    if (oldActiveVersionId) {
+      const oldVersion = await ctx.db.get(oldActiveVersionId);
+      if (oldVersion) {
+        receiptFileId = oldVersion.receiptFileId;
+      }
+    }
+
+    const newVersionId = await ctx.db.insert("transaction_versions", {
+      transactionId,
+      type: "expense",
+      amountCents,
+      entryDate,
+      description,
+      spentBy,
+      enteredBy,
+      receiptFileId,
+      createdAt: now,
+      supersedesVersionId: oldActiveVersionId,
+    });
+
+    await ctx.db.patch(transactionId, {
+      activeVersionId: newVersionId,
+      updatedAt: now,
+    });
+
+    return newVersionId;
+  },
+});
+
 export const createIncome = mutation({
   args: {
     amountCents: v.number(),

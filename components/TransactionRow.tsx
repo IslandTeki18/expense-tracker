@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { formatCents } from "@/lib/money";
 import { Id } from "@/convex/_generated/dataModel";
 
@@ -26,7 +27,10 @@ export default function TransactionRow({ txn }: { txn: TransactionRowData }) {
   const isIncome = txn.type === "income";
 
   return (
-    <div className="flex items-center gap-4 border-b border-gray-100 px-4 py-3 last:border-b-0">
+    <Link
+      href={`/transaction/${txn._id}`}
+      className="flex cursor-pointer items-center gap-4 border-b border-gray-100 px-4 py-3 last:border-b-0 hover:bg-gray-50"
+    >
       <span
         className={`inline-flex w-18 shrink-0 items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
           isIncome
@@ -69,6 +73,6 @@ export default function TransactionRow({ txn }: { txn: TransactionRowData }) {
           receipt
         </span>
       )}
-    </div>
+    </Link>
   );
 }

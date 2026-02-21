@@ -160,111 +160,111 @@
 
 ### Shared validation (server-side)
 
-- [ ] Implement defensive validation helpers in Convex
-  - [ ] Reject invalid cents (<= 0)
-  - [ ] Reject missing required fields
-  - [ ] Validate `entryDate` is `YYYY-MM-DD`
-  - [ ] Validate enums
+- [x] Implement defensive validation helpers in Convex
+  - [x] Reject invalid cents (<= 0)
+  - [x] Reject missing required fields
+  - [x] Validate `entryDate` is `YYYY-MM-DD`
+  - [x] Validate enums
 
 ### createIncome
 
-- [ ] `createIncome(payload)`
-  - [ ] Validate: amountCents, entryDate, enteredBy required
-  - [ ] Create `transactions` container
-  - [ ] Create first `transaction_versions` row
-  - [ ] Set `transactions.activeVersionId`
-  - [ ] Set createdAt/updatedAt server timestamps
+- [x] `createIncome(payload)`
+  - [x] Validate: amountCents, entryDate, enteredBy required
+  - [x] Create `transactions` container
+  - [x] Create first `transaction_versions` row
+  - [x] Set `transactions.activeVersionId`
+  - [x] Set createdAt/updatedAt server timestamps
 
 ### createExpense
 
-- [ ] `createExpense(payload)`
-  - [ ] Validate: amountCents, entryDate, description, spentBy, enteredBy required
-  - [ ] Create container + first version
-  - [ ] Set activeVersionId
-  - [ ] receiptFileId optional (may be null for now)
+- [x] `createExpense(payload)`
+  - [x] Validate: amountCents, entryDate, description, spentBy, enteredBy required
+  - [x] Create container + first version
+  - [x] Set activeVersionId
+  - [x] receiptFileId optional (may be null for now)
 
 ## 7) Dashboard UI (read-only)
 
-- [ ] Create `/dashboard` page shell
-- [ ] Add `BalanceHeader`
-  - [ ] Uses `getBalance`
-  - [ ] Formats cents -> dollars
-  - [ ] Handles loading / error states
-- [ ] Add `TransactionList`
-  - [ ] Uses `listTransactions`
-  - [ ] Newest-first rendering
-  - [ ] Empty state when no transactions
-- [ ] Add `TransactionRow`
-  - [ ] Displays:
-    - [ ] Type label (Income/Expense)
-    - [ ] Amount formatted
-    - [ ] Entry date (or blank indicator)
-    - [ ] Description
-    - [ ] SpentBy (expense only)
-    - [ ] EnteredBy
-    - [ ] Receipt indicator (if receiptFileId)
-- [ ] Add “Add Income” and “Add Expense” buttons (no action yet)
+- [x] Create `/dashboard` page shell
+- [x] Add `BalanceHeader`
+  - [x] Uses `getBalance`
+  - [x] Formats cents -> dollars
+  - [x] Handles loading / error states
+- [x] Add `TransactionList`
+  - [x] Uses `listTransactions`
+  - [x] Newest-first rendering
+  - [x] Empty state when no transactions
+- [x] Add `TransactionRow`
+  - [x] Displays:
+    - [x] Type label (Income/Expense)
+    - [x] Amount formatted
+    - [x] Entry date (or blank indicator)
+    - [x] Description
+    - [x] SpentBy (expense only)
+    - [x] EnteredBy
+    - [x] Receipt indicator (if receiptFileId)
+- [x] Add “Add Income” and “Add Expense” buttons (no action yet)
 
 ## 8) Create income UI
 
-- [ ] Build `TransactionFormModal` (income mode)
-  - [ ] Fields:
-    - [ ] Amount input (string UI)
-    - [ ] Entry date picker (required; default blank)
-    - [ ] Description optional
-    - [ ] EnteredBy select (You/Wife)
-  - [ ] Client validation using `validation.ts`
-  - [ ] Disable submit while mutation in-flight
-  - [ ] Show inline errors + mutation error
-- [ ] Wire submit to `createIncome`
-- [ ] Verify:
-  - [ ] Transaction appears at top of list
-  - [ ] Balance increases immediately
+- [x] Build `TransactionFormModal` (income mode)
+  - [x] Fields:
+    - [x] Amount input (string UI)
+    - [x] Entry date picker (required; default blank)
+    - [x] Description optional
+    - [x] EnteredBy select (You/Wife)
+  - [x] Client validation using `validation.ts`
+  - [x] Disable submit while mutation in-flight
+  - [x] Show inline errors + mutation error
+- [x] Wire submit to `createIncome`
+- [x] Verify:
+  - [x] Transaction appears at top of list
+  - [x] Balance increases immediately
 
 ## 9) Create expense UI (no receipt yet)
 
-- [ ] Extend `TransactionFormModal` (expense mode)
-  - [ ] Fields:
-    - [ ] Amount (required)
-    - [ ] Entry date (required)
-    - [ ] Description (required)
-    - [ ] SpentBy (required)
-    - [ ] EnteredBy (required)
-- [ ] Wire submit to `createExpense`
-- [ ] Verify:
-  - [ ] Transaction appears at top
-  - [ ] Balance decreases immediately
-  - [ ] Negative balances allowed (no blocking)
+- [x] Extend `TransactionFormModal` (expense mode)
+  - [x] Fields:
+    - [x] Amount (required)
+    - [x] Entry date (required)
+    - [x] Description (required)
+    - [x] SpentBy (required)
+    - [x] EnteredBy (required)
+- [x] Wire submit to `createExpense`
+- [x] Verify:
+  - [x] Transaction appears at top
+  - [x] Balance decreases immediately
+  - [x] Negative balances allowed (no blocking)
 
 ## 10) Transaction detail + history UI (read-only first)
 
-- [ ] Create route `/transaction/[id]`
-- [ ] Fetch and render active transaction
-  - [ ] `getTransaction`
-- [ ] Render history panel
-  - [ ] `listTransactionHistory`
-  - [ ] Show version timestamp + fields snapshot
-- [ ] Add navigation:
-  - [ ] Clicking a list row goes to detail page
+- [x] Create route `/transaction/[id]`
+- [x] Fetch and render active transaction
+  - [x] `getTransaction`
+- [x] Render history panel
+  - [x] `listTransactionHistory`
+  - [x] Show version timestamp + fields snapshot
+- [x] Add navigation:
+  - [x] Clicking a list row goes to detail page
 
 ## 11) Edit flows (versioning)
 
 ### Edit UI
 
-- [ ] Add “Edit” button on detail page
-- [ ] Reuse `TransactionFormModal` prefilled from active version
-- [ ] Prevent editing type (income stays income, expense stays expense)
+- [x] Add “Edit” button on detail page
+- [x] Reuse `TransactionFormModal` prefilled from active version
+- [x] Prevent editing type (income stays income, expense stays expense)
 
 ### Server mutations
 
-- [ ] `editIncome(transactionId, payload)`
-  - [ ] Validate payload for income
-  - [ ] Load transaction + current active version
-  - [ ] Create new version with `supersedesVersionId = oldActiveVersionId`
-  - [ ] Update `transactions.activeVersionId = newVersionId`
-  - [ ] Update `transactions.updatedAt`
-- [ ] `editExpense(transactionId, payload)`
-  - [ ] Same pattern, expense validation rules
+- [x] `editIncome(transactionId, payload)`
+  - [x] Validate payload for income
+  - [x] Load transaction + current active version
+  - [x] Create new version with `supersedesVersionId = oldActiveVersionId`
+  - [x] Update `transactions.activeVersionId = newVersionId`
+  - [x] Update `transactions.updatedAt`
+- [x] `editExpense(transactionId, payload)`
+  - [x] Same pattern, expense validation rules
 
 ### Verify edit behavior
 
