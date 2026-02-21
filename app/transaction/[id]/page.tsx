@@ -26,6 +26,9 @@ export default function TransactionDetailPage() {
   const params = useParams();
   const transactionId = params.id as Id<"transactions">;
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isUnlocked) {
@@ -50,6 +53,19 @@ export default function TransactionDetailPage() {
   );
 
   const replaceReceiptMutation = useMutation(api.transactions.replaceReceipt);
+  const deleteTransactionMutation = useMutation(api.transactions.deleteTransaction);
+
+  async function handleDelete() {
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteTransactionMutation({ transactionId });
+      router.push("/dashboard");
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete transaction");
+      setIsDeleting(false);
+    }
+  }
 
   if (authLoading || !isUnlocked) return null;
 
@@ -123,14 +139,55 @@ export default function TransactionDetailPage() {
             {isIncome ? "+" : "-"}
             {formatCents(transaction.amountCents)}
           </span>
-          <button
-            type="button"
-            onClick={() => setShowEditModal(true)}
-            className="ml-auto rounded border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Edit
-          </button>
+          <div className="ml-auto flex gap-2">
+            <button
+              type="button"
+              onClick={() => setShowEditModal(true)}
+              className="rounded border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="rounded border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
+            >
+              Delete
+            </button>
+          </div>
         </div>
+
+        {showDeleteConfirm && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+            <p className="text-sm text-red-800">
+              Are you sure? This will permanently delete this transaction and all
+              its history.
+            </p>
+            {deleteError && (
+              <p className="mt-2 text-sm text-red-600">{deleteError}</p>
+            )}
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteError(null);
+                }}
+                className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="rounded-lg border border-gray-200 bg-white">
           <dl className="divide-y divide-gray-100">

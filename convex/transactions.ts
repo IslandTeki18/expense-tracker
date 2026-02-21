@@ -281,6 +281,33 @@ export const replaceReceipt = mutation({
   },
 });
 
+export const deleteTransaction = mutation({
+  args: { transactionId: v.id("transactions") },
+  handler: async (ctx, { transactionId }) => {
+    const txn = await ctx.db.get(transactionId);
+    if (!txn) throw new Error("Transaction not found");
+
+    const versions = await ctx.db
+      .query("transaction_versions")
+      .withIndex("by_transactionId", (q) => q.eq("transactionId", transactionId))
+      .collect();
+
+    const receiptFileIds = versions
+      .map((v) => v.receiptFileId)
+      .filter((id): id is NonNullable<typeof id> => id !== null);
+
+    for (const fileId of receiptFileIds) {
+      await ctx.storage.delete(fileId);
+    }
+
+    for (const version of versions) {
+      await ctx.db.delete(version._id);
+    }
+
+    await ctx.db.delete(transactionId);
+  },
+});
+
 export const createIncome = mutation({
   args: {
     amountCents: v.number(),
