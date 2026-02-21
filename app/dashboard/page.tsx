@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthContext";
 import BalanceHeader from "@/components/BalanceHeader";
 import TransactionList from "@/components/TransactionList";
+import TransactionFormModal from "@/components/TransactionFormModal";
 
 export default function DashboardPage() {
   const { isUnlocked, isLoading, lock } = useAuth();
   const router = useRouter();
+  const [showIncomeModal, setShowIncomeModal] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isUnlocked) {
@@ -38,8 +40,8 @@ export default function DashboardPage() {
 
         <div className="flex gap-3">
           <button
-            disabled
-            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white opacity-50"
+            onClick={() => setShowIncomeModal(true)}
+            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
           >
             Add Income
           </button>
@@ -52,6 +54,13 @@ export default function DashboardPage() {
         </div>
 
         <TransactionList />
+
+        {showIncomeModal && (
+          <TransactionFormModal
+            mode="income"
+            onClose={() => setShowIncomeModal(false)}
+          />
+        )}
       </div>
     </main>
   );
