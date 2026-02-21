@@ -1,5 +1,23 @@
-import { query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+
+function assertPositiveCents(amount: number): void {
+  if (!Number.isInteger(amount) || amount <= 0) {
+    throw new Error("amountCents must be a positive integer");
+  }
+}
+
+function assertValidDate(date: string): void {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error("entryDate must be in YYYY-MM-DD format");
+  }
+}
+
+function assertNonEmpty(value: string, field: string): void {
+  if (value.trim().length === 0) {
+    throw new Error(`${field} must not be empty`);
+  }
+}
 
 export const getBalance = query({
   args: {},
@@ -8,6 +26,7 @@ export const getBalance = query({
     const transactions = await ctx.db.query("transactions").collect();
     let balanceCents = 0;
     for (const txn of transactions) {
+      if (!txn.activeVersionId) continue;
       const version = await ctx.db.get(txn.activeVersionId);
       if (!version) continue;
       if (txn.type === "income") {
@@ -31,6 +50,7 @@ export const listTransactions = query({
 
     const results = [];
     for (const txn of transactions) {
+      if (!txn.activeVersionId) continue;
       const version = await ctx.db.get(txn.activeVersionId);
       if (!version) continue;
       results.push({
@@ -56,7 +76,7 @@ export const getTransaction = query({
   args: { transactionId: v.id("transactions") },
   handler: async (ctx, { transactionId }) => {
     const txn = await ctx.db.get(transactionId);
-    if (!txn) return null;
+    if (!txn || !txn.activeVersionId) return null;
     const version = await ctx.db.get(txn.activeVersionId);
     if (!version) return null;
     return {
@@ -87,5 +107,91 @@ export const listTransactionHistory = query({
       )
       .order("desc")
       .collect();
+  },
+});
+
+export const createIncome = mutation({
+  args: {
+    amountCents: v.number(),
+    entryDate: v.string(),
+    enteredBy: v.union(v.literal("you"), v.literal("wife")),
+    description: v.optional(v.union(v.string(), v.null())),
+  },
+  handler: async (ctx, { amountCents, entryDate, enteredBy, description }) => {
+    assertPositiveCents(amountCents);
+    assertValidDate(entryDate);
+
+    const now = Date.now();
+
+    const txnId = await ctx.db.insert("transactions", {
+      type: "income",
+      activeVersionId: null,
+      createdAt: now,
+      createdBy: enteredBy,
+      updatedAt: now,
+    });
+
+    const versionId = await ctx.db.insert("transaction_versions", {
+      transactionId: txnId,
+      type: "income",
+      amountCents,
+      entryDate,
+      description: description ?? null,
+      spentBy: null,
+      enteredBy,
+      receiptFileId: null,
+      createdAt: now,
+      supersedesVersionId: null,
+    });
+
+    await ctx.db.patch(txnId, { activeVersionId: versionId });
+
+    return txnId;
+  },
+});
+
+export const createExpense = mutation({
+  args: {
+    amountCents: v.number(),
+    entryDate: v.string(),
+    description: v.string(),
+    spentBy: v.union(v.literal("you"), v.literal("wife")),
+    enteredBy: v.union(v.literal("you"), v.literal("wife")),
+    receiptFileId: v.optional(v.union(v.id("_storage"), v.null())),
+  },
+  handler: async (
+    ctx,
+    { amountCents, entryDate, description, spentBy, enteredBy, receiptFileId },
+  ) => {
+    assertPositiveCents(amountCents);
+    assertValidDate(entryDate);
+    assertNonEmpty(description, "description");
+
+    const now = Date.now();
+
+    const txnId = await ctx.db.insert("transactions", {
+      type: "expense",
+      activeVersionId: null,
+      createdAt: now,
+      createdBy: enteredBy,
+      updatedAt: now,
+    });
+
+    const versionId = await ctx.db.insert("transaction_versions", {
+      transactionId: txnId,
+      type: "expense",
+      amountCents,
+      entryDate,
+      description,
+      spentBy,
+      enteredBy,
+      receiptFileId: receiptFileId ?? null,
+      createdAt: now,
+      supersedesVersionId: null,
+    });
+
+    await ctx.db.patch(txnId, { activeVersionId: versionId });
+
+    return txnId;
   },
 });

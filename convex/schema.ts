@@ -4,7 +4,7 @@ import { v } from "convex/values";
 export default defineSchema({
   transactions: defineTable({
     type: v.union(v.literal("income"), v.literal("expense")),
-    activeVersionId: v.id("transaction_versions"),
+    activeVersionId: v.union(v.id("transaction_versions"), v.null()),
     createdAt: v.number(),
     createdBy: v.union(v.literal("you"), v.literal("wife")),
     updatedAt: v.number(),
