@@ -71,90 +71,90 @@
 
 ### Env + hashing
 
-- [ ] Decide passcode model
-  - [ ] Preferred: `PASSCODE_HASH` in env
-- [ ] Generate hash for passcode (document how)
-- [ ] Add env vars
-  - [ ] `PASSCODE_HASH` in `.env.local`
-  - [ ] Add placeholder in `.env.example`
+- [x] Decide passcode model
+  - [x] Preferred: `PASSCODE_HASH` in env
+- [x] Generate hash for passcode (document how)
+- [x] Add env vars
+  - [x] `PASSCODE_HASH` in `.env.local`
+  - [x] Add placeholder in `.env.example`
 
 ### Convex passcode function
 
-- [ ] Add Convex function `verifyPasscode(attempt: string): boolean`
-  - [ ] Compares attempt server-side against env hash
-  - [ ] Rejects empty attempts
-  - [ ] Returns boolean only (no data leakage)
+- [x] Add Convex function `verifyPasscode(attempt: string): boolean`
+  - [x] Compares attempt server-side against env hash
+  - [x] Rejects empty attempts
+  - [x] Returns boolean only (no data leakage)
 
 ### Unlock UI
 
-- [ ] Create `/unlock` page
-  - [ ] Passcode input
-  - [ ] Submit button
-  - [ ] Error message on failure
-  - [ ] Loading state while verifying
-- [ ] Persist unlocked state
-  - [ ] Store `localStorage.unlocked = "true"` on success
-  - [ ] Store timestamp of unlock (optional)
-  - [ ] In-memory flag to avoid flicker
-- [ ] Enforce lock
-  - [ ] `/` routes to `/unlock` when locked, else `/dashboard`
-  - [ ] `/dashboard` hard-blocks rendering Convex queries until unlocked
-- [ ] Optional brute-force friction
-  - [ ] Cooldown after N failures (client timer)
-  - [ ] Disable submit during cooldown
+- [x] Create `/unlock` page
+  - [x] Passcode input
+  - [x] Submit button
+  - [x] Error message on failure
+  - [x] Loading state while verifying
+- [x] Persist unlocked state
+  - [x] Store `localStorage.unlocked = "true"` on success
+  - [x] Store timestamp of unlock (optional)
+  - [x] In-memory flag to avoid flicker
+- [x] Enforce lock
+  - [x] `/` routes to `/unlock` when locked, else `/dashboard`
+  - [x] `/dashboard` hard-blocks rendering Convex queries until unlocked
+- [x] Optional brute-force friction
+  - [x] Cooldown after N failures (client timer)
+  - [x] Disable submit during cooldown
 
 ## 4) Convex data model
 
 ### schema.ts
 
-- [ ] Create `convex/schema.ts`
-- [ ] Add table: `transactions`
-  - [ ] Fields:
-    - [ ] `type: "income" | "expense"`
-    - [ ] `activeVersionId: Id<"transaction_versions">`
-    - [ ] `createdAt: number`
-    - [ ] `createdBy?: "you" | "wife"` (optional)
-    - [ ] `updatedAt: number`
-  - [ ] Indexes:
-    - [ ] `by_createdAt`
-    - [ ] `by_type_createdAt` (optional)
-- [ ] Add table: `transaction_versions`
-  - [ ] Fields:
-    - [ ] `transactionId: Id<"transactions">`
-    - [ ] `type: "income" | "expense"`
-    - [ ] `amountCents: number`
-    - [ ] `entryDate: string | null`
-    - [ ] `description: string | null`
-    - [ ] `spentBy: "you" | "wife" | null`
-    - [ ] `enteredBy: "you" | "wife"`
-    - [ ] `receiptFileId: Id<"_storage"> | null`
-    - [ ] `createdAt: number`
-    - [ ] `supersedesVersionId: Id<"transaction_versions"> | null`
-  - [ ] Indexes:
-    - [ ] `by_transactionId`
-    - [ ] `by_transactionId_createdAt`
-- [ ] Ensure schema compiles + Convex deploy succeeds
+- [x] Create `convex/schema.ts`
+- [x] Add table: `transactions`
+  - [x] Fields:
+    - [x] `type: "income" | "expense"`
+    - [x] `activeVersionId: Id<"transaction_versions">`
+    - [x] `createdAt: number`
+    - [x] `createdBy?: "you" | "wife"` (optional)
+    - [x] `updatedAt: number`
+  - [x] Indexes:
+    - [x] `by_createdAt`
+    - [x] `by_type_createdAt` (optional)
+- [x] Add table: `transaction_versions`
+  - [x] Fields:
+    - [x] `transactionId: Id<"transactions">`
+    - [x] `type: "income" | "expense"`
+    - [x] `amountCents: number`
+    - [x] `entryDate: string | null`
+    - [x] `description: string | null`
+    - [x] `spentBy: "you" | "wife" | null`
+    - [x] `enteredBy: "you" | "wife"`
+    - [x] `receiptFileId: Id<"_storage"> | null`
+    - [x] `createdAt: number`
+    - [x] `supersedesVersionId: Id<"transaction_versions"> | null`
+  - [x] Indexes:
+    - [x] `by_transactionId`
+    - [x] `by_transactionId_createdAt`
+- [x] Ensure schema compiles + Convex deploy succeeds
 
 ## 5) Convex queries
 
-- [ ] `getBalance()`
-  - [ ] Computes `balanceCents = sum(income active versions) - sum(expense active versions)`
-  - [ ] Uses ONLY active versions
-  - [ ] Returns `{ balanceCents }`
-- [ ] `listTransactions({ limit, cursor? })`
-  - [ ] Newest-first by `transactions.createdAt`
-  - [ ] Joins active version fields for UI
-  - [ ] Returns:
-    - [ ] transaction id
-    - [ ] type
-    - [ ] createdAt
-    - [ ] activeVersion fields needed for list (amountCents, entryDate, description, spentBy, enteredBy, receiptFileId, version createdAt)
-  - [ ] Supports pagination cursor (optional; still implement if easy)
-- [ ] `getTransaction({ transactionId })`
-  - [ ] Returns container + active version data
-- [ ] `listTransactionHistory({ transactionId })`
-  - [ ] Returns all versions (choose newest-first and stick to it)
-  - [ ] Includes `supersedesVersionId` for linkage (optional)
+- [x] `getBalance()`
+  - [x] Computes `balanceCents = sum(income active versions) - sum(expense active versions)`
+  - [x] Uses ONLY active versions
+  - [x] Returns `{ balanceCents }`
+- [x] `listTransactions({ limit, cursor? })`
+  - [x] Newest-first by `transactions.createdAt`
+  - [x] Joins active version fields for UI
+  - [x] Returns:
+    - [x] transaction id
+    - [x] type
+    - [x] createdAt
+    - [x] activeVersion fields needed for list (amountCents, entryDate, description, spentBy, enteredBy, receiptFileId, version createdAt)
+  - [x] Supports pagination cursor (optional; still implement if easy)
+- [x] `getTransaction({ transactionId })`
+  - [x] Returns container + active version data
+- [x] `listTransactionHistory({ transactionId })`
+  - [x] Returns all versions (choose newest-first and stick to it)
+  - [x] Includes `supersedesVersionId` for linkage (optional)
 
 ## 6) Convex mutations (create)
 
