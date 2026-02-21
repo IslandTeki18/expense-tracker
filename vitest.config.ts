@@ -10,5 +10,9 @@ export default defineConfig({
   test: {
     include: ["**/*.test.ts"],
     exclude: ["node_modules", ".next", "convex/_generated"],
+    environmentMatchGlobs: [
+      ["convex/**", "edge-runtime"],
+    ],
+    server: { deps: { inline: ["convex-test"] } },
   },
 });

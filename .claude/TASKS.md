@@ -329,18 +329,18 @@
 
 ## 14) Error handling + UX hardening
 
-- [ ] Global error boundary pages (Next.js)
-- [ ] Consistent loading states for:
-  - [ ] Balance
-  - [ ] List
-  - [ ] Detail + history
-- [ ] Toast or inline error strategy chosen and applied consistently
-- [ ] Form UX:
-  - [ ] Inline field errors
-  - [ ] Keep modal open on failure
-  - [ ] Reset form on success
-- [ ] Ensure app never fetches data while locked
-  - [ ] Confirm no queries are invoked pre-unlock
+- [x] Global error boundary pages (Next.js)
+- [x] Consistent loading states for:
+  - [x] Balance
+  - [x] List
+  - [x] Detail + history
+- [x] Toast or inline error strategy chosen and applied consistently
+- [x] Form UX:
+  - [x] Inline field errors
+  - [x] Keep modal open on failure
+  - [x] Reset form on success
+- [x] Ensure app never fetches data while locked
+  - [x] Confirm no queries are invoked pre-unlock
 
 ## 15) Testing plan execution
 
