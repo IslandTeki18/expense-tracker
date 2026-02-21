@@ -37,7 +37,7 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <BalanceHeader />
+        <BalanceHeader isUnlocked={isUnlocked} />
 
         <div className="flex gap-3">
           <button
@@ -54,7 +54,7 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <TransactionList />
+        <TransactionList isUnlocked={isUnlocked} />
 
         {showIncomeModal && (
           <TransactionFormModal

@@ -4,8 +4,8 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { formatCents } from "@/lib/money";
 
-export default function BalanceHeader() {
-  const result = useQuery(api.transactions.getBalance);
+export default function BalanceHeader({ isUnlocked }: { isUnlocked: boolean }) {
+  const result = useQuery(api.transactions.getBalance, isUnlocked ? {} : "skip");
 
   if (result === undefined) {
     return (

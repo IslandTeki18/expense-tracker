@@ -268,64 +268,64 @@
 
 ### Verify edit behavior
 
-- [ ] List reflects new active values
-- [ ] History shows old version(s)
-- [ ] Balance recomputes correctly based on active versions only
+- [x] List reflects new active values
+- [x] History shows old version(s)
+- [x] Balance recomputes correctly based on active versions only
 
 ## 12) Receipts (upload + view + replace)
 
 ### Upload plumbing
 
-- [ ] Implement receipt upload UI in expense form
-- [ ] Use Convex file storage pattern for uploads
-  - [ ] Generate upload URL if required (actions)
-  - [ ] Upload file from client
-  - [ ] Receive `storageId` (receiptFileId)
-- [ ] Store receiptFileId on version creation/edit
-  - [ ] For createExpense: attach to first version if provided
-  - [ ] For editExpense: attach to new version if provided
+- [x] Implement receipt upload UI in expense form
+- [x] Use Convex file storage pattern for uploads
+  - [x] Generate upload URL if required (actions)
+  - [x] Upload file from client
+  - [x] Receive `storageId` (receiptFileId)
+- [x] Store receiptFileId on version creation/edit
+  - [x] For createExpense: attach to first version if provided
+  - [x] For editExpense: attach to new version if provided
 
 ### View receipt
 
-- [ ] In list row, show receipt indicator if `receiptFileId`
-- [ ] On detail page, show “View receipt” when present
-  - [ ] Use Convex file URL retrieval pattern (as needed)
+- [x] In list row, show receipt indicator if `receiptFileId`
+- [x] On detail page, show “View receipt” when present
+  - [x] Use Convex file URL retrieval pattern (as needed)
 
 ### Replace receipt (overwrite, no history)
 
-- [ ] Implement `replaceReceipt(transactionId, newReceiptFileId)`
-  - [ ] Delete old receipt file id (best effort)
-  - [ ] Create a new version that supersedes active version (recommended for consistency)
-    - [ ] Copy all fields from active version
-    - [ ] Set `receiptFileId = newReceiptFileId`
-    - [ ] Set `supersedesVersionId = oldActiveVersionId`
-    - [ ] Update `activeVersionId`
-- [ ] Ensure old receipt is no longer accessible
-  - [ ] Delete succeeds or old link breaks
+- [x] Implement `replaceReceipt(transactionId, newReceiptFileId)`
+  - [x] Delete old receipt file id (best effort)
+  - [x] Create a new version that supersedes active version (recommended for consistency)
+    - [x] Copy all fields from active version
+    - [x] Set `receiptFileId = newReceiptFileId`
+    - [x] Set `supersedesVersionId = oldActiveVersionId`
+    - [x] Update `activeVersionId`
+- [x] Ensure old receipt is no longer accessible
+  - [x] Delete succeeds or old link breaks
 
 ## 13) Delete (hard delete everything)
 
 ### UI
 
-- [ ] Add “Delete” button on detail page
-- [ ] Add confirmation dialog
-- [ ] Disable button while deleting
-- [ ] On success, return to dashboard
+- [x] Add “Delete” button on detail page
+- [x] Add confirmation dialog
+- [x] Disable button while deleting
+- [x] On success, return to dashboard
 
 ### Server mutation
 
-- [ ] Implement `deleteTransaction(transactionId)`
-  - [ ] Load all versions for transaction
-  - [ ] Collect all `receiptFileId`s present across versions
-  - [ ] Delete storage files (best effort, but attempt all)
-  - [ ] Delete version rows
-  - [ ] Delete transaction container row
+- [x] Implement `deleteTransaction(transactionId)`
+  - [x] Load all versions for transaction
+  - [x] Collect all `receiptFileId`s present across versions
+  - [x] Delete storage files (best effort, but attempt all)
+  - [x] Delete version rows
+  - [x] Delete transaction container row
 
 ### Verify
 
-- [ ] Transaction disappears from list
-- [ ] Balance recomputes correctly
-- [ ] Detail route no longer loads
+- [x] Transaction disappears from list
+- [x] Balance recomputes correctly
+- [x] Detail route no longer loads
 
 ## 14) Error handling + UX hardening
 

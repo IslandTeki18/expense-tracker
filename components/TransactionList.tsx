@@ -6,10 +6,11 @@ import TransactionRow from "./TransactionRow";
 
 const LIST_LIMIT = 50;
 
-export default function TransactionList() {
-  const transactions = useQuery(api.transactions.listTransactions, {
-    limit: LIST_LIMIT,
-  });
+export default function TransactionList({ isUnlocked }: { isUnlocked: boolean }) {
+  const transactions = useQuery(
+    api.transactions.listTransactions,
+    isUnlocked ? { limit: LIST_LIMIT } : "skip",
+  );
 
   if (transactions === undefined) {
     return (
