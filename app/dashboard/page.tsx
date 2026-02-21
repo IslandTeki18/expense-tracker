@@ -11,6 +11,7 @@ export default function DashboardPage() {
   const { isUnlocked, isLoading, lock } = useAuth();
   const router = useRouter();
   const [showIncomeModal, setShowIncomeModal] = useState(false);
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isUnlocked) {
@@ -46,8 +47,8 @@ export default function DashboardPage() {
             Add Income
           </button>
           <button
-            disabled
-            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white opacity-50"
+            onClick={() => setShowExpenseModal(true)}
+            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
           >
             Add Expense
           </button>
@@ -59,6 +60,13 @@ export default function DashboardPage() {
           <TransactionFormModal
             mode="income"
             onClose={() => setShowIncomeModal(false)}
+          />
+        )}
+
+        {showExpenseModal && (
+          <TransactionFormModal
+            mode="expense"
+            onClose={() => setShowExpenseModal(false)}
           />
         )}
       </div>

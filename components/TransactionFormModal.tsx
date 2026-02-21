@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { parseMoneyToCents } from "@/lib/money";
-import { validateIncome } from "@/lib/validation";
+import { validateIncome, validateExpense } from "@/lib/validation";
 import type { TxnType, Person } from "@/lib/types";
 
 interface TransactionFormModalProps {
@@ -20,11 +20,13 @@ export default function TransactionFormModal({
   const [entryDate, setEntryDate] = useState("");
   const [description, setDescription] = useState("");
   const [enteredBy, setEnteredBy] = useState<Person>("you");
+  const [spentBy, setSpentBy] = useState<Person>("you");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const createIncome = useMutation(api.transactions.createIncome);
+  const createExpense = useMutation(api.transactions.createExpense);
 
   const handleClose = useCallback(() => {
     if (!isSubmitting) onClose();
@@ -73,6 +75,36 @@ export default function TransactionFormModal({
           entryDate,
           enteredBy,
           description: trimmedDesc || null,
+        });
+        onClose();
+      } catch (err) {
+        setSubmitError(
+          err instanceof Error ? err.message : "Something went wrong.",
+        );
+        setIsSubmitting(false);
+      }
+    } else {
+      const result = validateExpense({
+        amountCents,
+        entryDate,
+        enteredBy,
+        description: trimmedDesc,
+        spentBy,
+      });
+
+      if (!result.valid) {
+        setFieldErrors(result.errors);
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        await createExpense({
+          amountCents,
+          entryDate,
+          enteredBy,
+          description: trimmedDesc,
+          spentBy,
         });
         onClose();
       } catch (err) {
@@ -204,15 +236,34 @@ export default function TransactionFormModal({
           </div>
 
           {mode === "expense" && (
-            <>
-              {/* Expense-only fields: spentBy, receipt upload (Task 9) */}
-            </>
+            <div>
+              <label
+                htmlFor="spentBy"
+                className="mb-1 block text-sm font-medium text-gray-700"
+              >
+                Spent By
+              </label>
+              <select
+                id="spentBy"
+                value={spentBy}
+                onChange={(e) => setSpentBy(e.target.value as Person)}
+                className="w-full rounded border border-gray-300 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="you">You</option>
+                <option value="wife">Wife</option>
+              </select>
+              {fieldErrors.spentBy && (
+                <p className="mt-1 text-sm text-red-600">
+                  {fieldErrors.spentBy}
+                </p>
+              )}
+            </div>
           )}
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded bg-green-600 px-4 py-2 font-medium text-white hover:bg-green-700 disabled:opacity-50"
+            className={`w-full rounded px-4 py-2 font-medium text-white disabled:opacity-50 ${mode === "income" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}`}
           >
             {isSubmitting
               ? "Saving..."
