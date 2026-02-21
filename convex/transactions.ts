@@ -163,10 +163,11 @@ export const editExpense = mutation({
     description: v.string(),
     spentBy: v.union(v.literal("you"), v.literal("wife")),
     enteredBy: v.union(v.literal("you"), v.literal("wife")),
+    receiptFileId: v.optional(v.union(v.id("_storage"), v.null())),
   },
   handler: async (
     ctx,
-    { transactionId, amountCents, entryDate, description, spentBy, enteredBy },
+    { transactionId, amountCents, entryDate, description, spentBy, enteredBy, receiptFileId: newReceiptFileId },
   ) => {
     const txn = await ctx.db.get(transactionId);
     if (!txn) throw new Error("Transaction not found");
@@ -180,13 +181,20 @@ export const editExpense = mutation({
     const oldActiveVersionId = txn.activeVersionId;
     const now = Date.now();
 
-    // Carry forward receiptFileId from old active version
-    let receiptFileId = null;
+    // Determine receiptFileId: use provided value, or carry forward from old version
+    let resolvedReceiptFileId = null;
+    let oldReceiptFileId = null;
     if (oldActiveVersionId) {
       const oldVersion = await ctx.db.get(oldActiveVersionId);
       if (oldVersion) {
-        receiptFileId = oldVersion.receiptFileId;
+        oldReceiptFileId = oldVersion.receiptFileId;
       }
+    }
+
+    if (newReceiptFileId !== undefined) {
+      resolvedReceiptFileId = newReceiptFileId;
+    } else {
+      resolvedReceiptFileId = oldReceiptFileId;
     }
 
     const newVersionId = await ctx.db.insert("transaction_versions", {
@@ -197,7 +205,7 @@ export const editExpense = mutation({
       description,
       spentBy,
       enteredBy,
-      receiptFileId,
+      receiptFileId: resolvedReceiptFileId,
       createdAt: now,
       supersedesVersionId: oldActiveVersionId,
     });
@@ -206,6 +214,68 @@ export const editExpense = mutation({
       activeVersionId: newVersionId,
       updatedAt: now,
     });
+
+    // Delete old receipt file if it was replaced
+    if (newReceiptFileId !== undefined && oldReceiptFileId && oldReceiptFileId !== newReceiptFileId) {
+      await ctx.storage.delete(oldReceiptFileId);
+    }
+
+    return newVersionId;
+  },
+});
+
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const getReceiptUrl = query({
+  args: { storageId: v.id("_storage") },
+  handler: async (ctx, { storageId }) => {
+    return await ctx.storage.getUrl(storageId);
+  },
+});
+
+export const replaceReceipt = mutation({
+  args: {
+    transactionId: v.id("transactions"),
+    newReceiptFileId: v.id("_storage"),
+  },
+  handler: async (ctx, { transactionId, newReceiptFileId }) => {
+    const txn = await ctx.db.get(transactionId);
+    if (!txn) throw new Error("Transaction not found");
+    if (txn.type !== "expense")
+      throw new Error("Only expenses can have receipts");
+    if (!txn.activeVersionId) throw new Error("No active version");
+
+    const oldVersion = await ctx.db.get(txn.activeVersionId);
+    if (!oldVersion) throw new Error("Active version not found");
+
+    const now = Date.now();
+
+    const newVersionId = await ctx.db.insert("transaction_versions", {
+      transactionId,
+      type: "expense",
+      amountCents: oldVersion.amountCents,
+      entryDate: oldVersion.entryDate,
+      description: oldVersion.description,
+      spentBy: oldVersion.spentBy,
+      enteredBy: oldVersion.enteredBy,
+      receiptFileId: newReceiptFileId,
+      createdAt: now,
+      supersedesVersionId: txn.activeVersionId,
+    });
+
+    await ctx.db.patch(transactionId, {
+      activeVersionId: newVersionId,
+      updatedAt: now,
+    });
+
+    if (oldVersion.receiptFileId) {
+      await ctx.storage.delete(oldVersion.receiptFileId);
+    }
 
     return newVersionId;
   },

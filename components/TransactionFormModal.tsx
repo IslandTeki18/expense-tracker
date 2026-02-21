@@ -7,6 +7,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { parseMoneyToCents } from "@/lib/money";
 import { validateIncome, validateExpense } from "@/lib/validation";
 import type { TxnType, Person } from "@/lib/types";
+import ReceiptUploader from "@/components/ReceiptUploader";
 
 interface EditData {
   transactionId: Id<"transactions">;
@@ -15,6 +16,7 @@ interface EditData {
   description: string | null;
   spentBy: Person | null;
   enteredBy: Person;
+  receiptFileId?: Id<"_storage"> | null;
 }
 
 interface TransactionFormModalProps {
@@ -45,6 +47,7 @@ export default function TransactionFormModal({
   const [spentBy, setSpentBy] = useState<Person>(() =>
     editData?.spentBy ?? "you",
   );
+  const [receiptFileId, setReceiptFileId] = useState<Id<"_storage"> | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -143,6 +146,7 @@ export default function TransactionFormModal({
             enteredBy,
             description: trimmedDesc,
             spentBy,
+            ...(receiptFileId ? { receiptFileId } : {}),
           });
         } else {
           await createExpense({
@@ -151,6 +155,7 @@ export default function TransactionFormModal({
             enteredBy,
             description: trimmedDesc,
             spentBy,
+            ...(receiptFileId ? { receiptFileId } : {}),
           });
         }
         onClose();
@@ -220,7 +225,7 @@ export default function TransactionFormModal({
               placeholder="0.00"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full rounded border border-gray-300 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             {fieldErrors.amountCents && (
               <p className="mt-1 text-sm text-red-600">
@@ -241,7 +246,7 @@ export default function TransactionFormModal({
               type="date"
               value={entryDate}
               onChange={(e) => setEntryDate(e.target.value)}
-              className="w-full rounded border border-gray-300 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             {fieldErrors.entryDate && (
               <p className="mt-1 text-sm text-red-600">
@@ -262,7 +267,7 @@ export default function TransactionFormModal({
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded border border-gray-300 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             {fieldErrors.description && (
               <p className="mt-1 text-sm text-red-600">
@@ -282,7 +287,7 @@ export default function TransactionFormModal({
               id="enteredBy"
               value={enteredBy}
               onChange={(e) => setEnteredBy(e.target.value as Person)}
-              className="w-full rounded border border-gray-300 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="you">You</option>
               <option value="wife">Wife</option>
@@ -295,28 +300,35 @@ export default function TransactionFormModal({
           </div>
 
           {mode === "expense" && (
-            <div>
-              <label
-                htmlFor="spentBy"
-                className="mb-1 block text-sm font-medium text-gray-700"
-              >
-                Spent By
-              </label>
-              <select
-                id="spentBy"
-                value={spentBy}
-                onChange={(e) => setSpentBy(e.target.value as Person)}
-                className="w-full rounded border border-gray-300 px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="you">You</option>
-                <option value="wife">Wife</option>
-              </select>
-              {fieldErrors.spentBy && (
-                <p className="mt-1 text-sm text-red-600">
-                  {fieldErrors.spentBy}
-                </p>
-              )}
-            </div>
+            <>
+              <div>
+                <label
+                  htmlFor="spentBy"
+                  className="mb-1 block text-sm font-medium text-gray-700"
+                >
+                  Spent By
+                </label>
+                <select
+                  id="spentBy"
+                  value={spentBy}
+                  onChange={(e) => setSpentBy(e.target.value as Person)}
+                  className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="you">You</option>
+                  <option value="wife">Wife</option>
+                </select>
+                {fieldErrors.spentBy && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {fieldErrors.spentBy}
+                  </p>
+                )}
+              </div>
+              <ReceiptUploader
+                onUploaded={(id) => setReceiptFileId(id)}
+                existingReceiptFileId={editData?.receiptFileId}
+                disabled={isSubmitting}
+              />
+            </>
           )}
 
           <button

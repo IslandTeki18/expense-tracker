@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAuth } from "@/components/AuthContext";
 import { formatCents } from "@/lib/money";
 import HistoryPanel from "@/components/HistoryPanel";
 import TransactionFormModal from "@/components/TransactionFormModal";
+import ReceiptUploader from "@/components/ReceiptUploader";
 
 function formatPersonLabel(person: "you" | "wife"): string {
   return person === "you" ? "You" : "Wife";
@@ -40,6 +41,15 @@ export default function TransactionDetailPage() {
     api.transactions.listTransactionHistory,
     isUnlocked ? { transactionId } : "skip",
   );
+
+  const receiptUrl = useQuery(
+    api.transactions.getReceiptUrl,
+    isUnlocked && transaction?.receiptFileId
+      ? { storageId: transaction.receiptFileId }
+      : "skip",
+  );
+
+  const replaceReceiptMutation = useMutation(api.transactions.replaceReceipt);
 
   if (authLoading || !isUnlocked) return null;
 
@@ -156,10 +166,38 @@ export default function TransactionDetailPage() {
               </dd>
             </div>
 
-            {transaction.receiptFileId && (
-              <div className="flex justify-between px-4 py-3">
-                <dt className="text-sm text-gray-500">Receipt</dt>
-                <dd className="text-sm font-medium text-blue-600">Attached</dd>
+            {transaction.type === "expense" && (
+              <div className="px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <dt className="text-sm text-gray-500">Receipt</dt>
+                  <dd className="text-sm font-medium">
+                    {transaction.receiptFileId && receiptUrl ? (
+                      <a
+                        href={receiptUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        View Receipt
+                      </a>
+                    ) : transaction.receiptFileId ? (
+                      <span className="text-gray-400">Loading...</span>
+                    ) : (
+                      <span className="text-gray-400">None</span>
+                    )}
+                  </dd>
+                </div>
+                <div className="mt-2">
+                  <ReceiptUploader
+                    onUploaded={async (storageId) => {
+                      await replaceReceiptMutation({
+                        transactionId: transaction._id,
+                        newReceiptFileId: storageId,
+                      });
+                    }}
+                    existingReceiptFileId={transaction.receiptFileId}
+                  />
+                </div>
               </div>
             )}
 
@@ -198,6 +236,7 @@ export default function TransactionDetailPage() {
             description: transaction.description,
             spentBy: transaction.spentBy,
             enteredBy: transaction.enteredBy,
+            receiptFileId: transaction.receiptFileId,
           }}
         />
       )}
