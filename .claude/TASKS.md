@@ -33,39 +33,39 @@
 
 ### money.ts
 
-- [ ] Create `lib/money.ts`
-- [ ] Implement `formatCents(cents: number): string`
-  - [ ] Always 2 decimals
-  - [ ] Handles negative cents
-- [ ] Implement `parseMoneyToCents(input: string): number`
-  - [ ] Accepts `1`, `1.2`, `1.23`, `$1.23`, `1.23`
-  - [ ] Rejects invalid strings (letters, multiple decimals, empty)
-  - [ ] Prevents NaN/Infinity
-- [ ] Unit tests for `money.ts`
-  - [ ] `"$1.23" -> 123`
-  - [ ] `"1.23" -> 123`
-  - [ ] `"1" -> 100`
-  - [ ] `"0.01" -> 1`
-  - [ ] `format 123 -> "$1.23"`
-  - [ ] `format -123 -> "-$1.23"` (or `"$-1.23"`; pick one)
-  - [ ] invalid input rejected
+- [x] Create `lib/money.ts`
+- [x] Implement `formatCents(cents: number): string`
+  - [x] Always 2 decimals
+  - [x] Handles negative cents
+- [x] Implement `parseMoneyToCents(input: string): number`
+  - [x] Accepts `1`, `1.2`, `1.23`, `$1.23`, `1.23`
+  - [x] Rejects invalid strings (letters, multiple decimals, empty)
+  - [x] Prevents NaN/Infinity
+- [x] Unit tests for `money.ts`
+  - [x] `"$1.23" -> 123`
+  - [x] `"1.23" -> 123`
+  - [x] `"1" -> 100`
+  - [x] `"0.01" -> 1`
+  - [x] `format 123 -> "$1.23"`
+  - [x] `format -123 -> "-$1.23"` (or `"$-1.23"`; pick one)
+  - [x] invalid input rejected
 
 ### validation.ts
 
-- [ ] Create `lib/validation.ts`
-- [ ] Define shared types for form payloads
-  - [ ] `Person = "you" | "wife"`
-  - [ ] `TxnType = "income" | "expense"`
-- [ ] Implement validation helpers
-  - [ ] `validateIncome(payload)` returns field errors
-  - [ ] `validateExpense(payload)` returns field errors
-- [ ] Rules enforced (client-side)
-  - [ ] `amountCents` required and `> 0`
-  - [ ] `entryDate` required (ISO `YYYY-MM-DD`)
-  - [ ] `enteredBy` required for both
-  - [ ] Expense: `description` required
-  - [ ] Expense: `spentBy` required
-- [ ] Unit tests for `validation.ts`
+- [x] Create `lib/validation.ts`
+- [x] Define shared types for form payloads
+  - [x] `Person = "you" | "wife"`
+  - [x] `TxnType = "income" | "expense"`
+- [x] Implement validation helpers
+  - [x] `validateIncome(payload)` returns field errors
+  - [x] `validateExpense(payload)` returns field errors
+- [x] Rules enforced (client-side)
+  - [x] `amountCents` required and `> 0`
+  - [x] `entryDate` required (ISO `YYYY-MM-DD`)
+  - [x] `enteredBy` required for both
+  - [x] Expense: `description` required
+  - [x] Expense: `spentBy` required
+- [x] Unit tests for `validation.ts`
 
 ## 3) Passcode gate (must block all data)
 
