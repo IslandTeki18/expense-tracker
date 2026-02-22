@@ -29,10 +29,10 @@ export default function TransactionRow({ txn }: { txn: TransactionRowData }) {
   return (
     <Link
       href={`/transaction/${txn._id}`}
-      className="flex cursor-pointer items-center gap-4 border-b border-gray-100 px-4 py-3 last:border-b-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800"
+      className="flex cursor-pointer flex-wrap items-center gap-2 border-b border-gray-100 px-4 py-3 last:border-b-0 hover:bg-gray-50 sm:flex-nowrap sm:gap-4 dark:border-gray-800 dark:hover:bg-gray-800"
     >
       <span
-        className={`inline-flex w-18 shrink-0 items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+        className={`inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium sm:w-18 sm:shrink-0 ${
           isIncome
             ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
             : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
@@ -42,7 +42,7 @@ export default function TransactionRow({ txn }: { txn: TransactionRowData }) {
       </span>
 
       <span
-        className={`w-24 shrink-0 text-right text-sm font-semibold ${
+        className={`text-right text-sm font-semibold sm:w-24 sm:shrink-0 ${
           isIncome ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"
         }`}
       >
@@ -50,11 +50,11 @@ export default function TransactionRow({ txn }: { txn: TransactionRowData }) {
         {formatCents(txn.amountCents)}
       </span>
 
-      <span className="w-24 shrink-0 text-sm text-gray-500 dark:text-gray-400">
+      <span className="text-sm text-gray-500 sm:w-24 sm:shrink-0 dark:text-gray-400">
         {txn.entryDate ?? "--"}
       </span>
 
-      <span className="min-w-0 flex-1 truncate text-sm text-gray-900 dark:text-gray-100">
+      <span className="min-w-0 w-full flex-1 truncate text-sm text-gray-900 sm:w-auto dark:text-gray-100">
         {txn.description ?? ""}
       </span>
 
