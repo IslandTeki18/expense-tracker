@@ -73,18 +73,18 @@ export default function TransactionDetailPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-gray-50 p-4 sm:p-8">
+      <main className="min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-950">
         <div className="mx-auto max-w-2xl space-y-6">
           <Link
             href="/dashboard"
-            className="text-sm text-blue-600 hover:text-blue-800"
+            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
           >
             &larr; Back to Dashboard
           </Link>
           <div className="animate-pulse space-y-4">
-            <div className="h-8 w-48 rounded bg-gray-200" />
-            <div className="h-40 rounded-lg bg-gray-200" />
-            <div className="h-32 rounded-lg bg-gray-200" />
+            <div className="h-8 w-48 rounded bg-gray-200 dark:bg-gray-700" />
+            <div className="h-40 rounded-lg bg-gray-200 dark:bg-gray-700" />
+            <div className="h-32 rounded-lg bg-gray-200 dark:bg-gray-700" />
           </div>
         </div>
       </main>
@@ -93,16 +93,16 @@ export default function TransactionDetailPage() {
 
   if (transaction === null) {
     return (
-      <main className="min-h-screen bg-gray-50 p-4 sm:p-8">
+      <main className="min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-950">
         <div className="mx-auto max-w-2xl space-y-6">
           <Link
             href="/dashboard"
-            className="text-sm text-blue-600 hover:text-blue-800"
+            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
           >
             &larr; Back to Dashboard
           </Link>
-          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center">
-            <p className="text-gray-500">Transaction not found.</p>
+          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center dark:border-gray-700 dark:bg-gray-900">
+            <p className="text-gray-500 dark:text-gray-400">Transaction not found.</p>
           </div>
         </div>
       </main>
@@ -112,11 +112,11 @@ export default function TransactionDetailPage() {
   const isIncome = transaction.type === "income";
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 sm:p-8">
+    <main className="min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-950">
       <div className="mx-auto max-w-2xl space-y-6">
         <Link
           href="/dashboard"
-          className="text-sm text-blue-600 hover:text-blue-800"
+          className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
         >
           &larr; Back to Dashboard
         </Link>
@@ -125,15 +125,15 @@ export default function TransactionDetailPage() {
           <span
             className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
               isIncome
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
+                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
             }`}
           >
             {isIncome ? "Income" : "Expense"}
           </span>
           <span
             className={`text-2xl font-bold ${
-              isIncome ? "text-green-700" : "text-red-700"
+              isIncome ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"
             }`}
           >
             {isIncome ? "+" : "-"}
@@ -143,14 +143,14 @@ export default function TransactionDetailPage() {
             <button
               type="button"
               onClick={() => setShowEditModal(true)}
-              className="rounded border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
             >
               Edit
             </button>
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
-              className="rounded border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
+              className="rounded border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
             >
               Delete
             </button>
@@ -158,13 +158,13 @@ export default function TransactionDetailPage() {
         </div>
 
         {showDeleteConfirm && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-            <p className="text-sm text-red-800">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+            <p className="text-sm text-red-800 dark:text-red-300">
               Are you sure? This will permanently delete this transaction and all
               its history.
             </p>
             {deleteError && (
-              <p className="mt-2 text-sm text-red-600">{deleteError}</p>
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400">{deleteError}</p>
             )}
             <div className="mt-3 flex gap-2">
               <button
@@ -173,7 +173,7 @@ export default function TransactionDetailPage() {
                   setShowDeleteConfirm(false);
                   setDeleteError(null);
                 }}
-                className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
               >
                 Cancel
               </button>
@@ -189,26 +189,26 @@ export default function TransactionDetailPage() {
           </div>
         )}
 
-        <div className="rounded-lg border border-gray-200 bg-white">
-          <dl className="divide-y divide-gray-100">
+        <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+          <dl className="divide-y divide-gray-100 dark:divide-gray-800">
             <div className="flex justify-between px-4 py-3">
-              <dt className="text-sm text-gray-500">Entry Date</dt>
-              <dd className="text-sm font-medium text-gray-900">
+              <dt className="text-sm text-gray-500 dark:text-gray-400">Entry Date</dt>
+              <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {transaction.entryDate ?? "--"}
               </dd>
             </div>
 
             <div className="flex justify-between px-4 py-3">
-              <dt className="text-sm text-gray-500">Description</dt>
-              <dd className="text-sm font-medium text-gray-900">
+              <dt className="text-sm text-gray-500 dark:text-gray-400">Description</dt>
+              <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {transaction.description ?? "--"}
               </dd>
             </div>
 
             {transaction.type === "expense" && (
               <div className="flex justify-between px-4 py-3">
-                <dt className="text-sm text-gray-500">Spent By</dt>
-                <dd className="text-sm font-medium text-gray-900">
+                <dt className="text-sm text-gray-500 dark:text-gray-400">Spent By</dt>
+                <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   {transaction.spentBy
                     ? formatPersonLabel(transaction.spentBy)
                     : "--"}
@@ -217,8 +217,8 @@ export default function TransactionDetailPage() {
             )}
 
             <div className="flex justify-between px-4 py-3">
-              <dt className="text-sm text-gray-500">Entered By</dt>
-              <dd className="text-sm font-medium text-gray-900">
+              <dt className="text-sm text-gray-500 dark:text-gray-400">Entered By</dt>
+              <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {formatPersonLabel(transaction.enteredBy)}
               </dd>
             </div>
@@ -226,21 +226,21 @@ export default function TransactionDetailPage() {
             {transaction.type === "expense" && (
               <div className="px-4 py-3">
                 <div className="flex items-center justify-between">
-                  <dt className="text-sm text-gray-500">Receipt</dt>
+                  <dt className="text-sm text-gray-500 dark:text-gray-400">Receipt</dt>
                   <dd className="text-sm font-medium">
                     {transaction.receiptFileId && receiptUrl ? (
                       <a
                         href={receiptUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                       >
                         View Receipt
                       </a>
                     ) : transaction.receiptFileId ? (
-                      <span className="text-gray-400">Loading...</span>
+                      <span className="text-gray-400 dark:text-gray-500">Loading...</span>
                     ) : (
-                      <span className="text-gray-400">None</span>
+                      <span className="text-gray-400 dark:text-gray-500">None</span>
                     )}
                   </dd>
                 </div>
@@ -259,15 +259,15 @@ export default function TransactionDetailPage() {
             )}
 
             <div className="flex justify-between px-4 py-3">
-              <dt className="text-sm text-gray-500">Created</dt>
-              <dd className="text-sm text-gray-700">
+              <dt className="text-sm text-gray-500 dark:text-gray-400">Created</dt>
+              <dd className="text-sm text-gray-700 dark:text-gray-300">
                 {formatTimestamp(transaction.createdAt)}
               </dd>
             </div>
 
             <div className="flex justify-between px-4 py-3">
-              <dt className="text-sm text-gray-500">Last Updated</dt>
-              <dd className="text-sm text-gray-700">
+              <dt className="text-sm text-gray-500 dark:text-gray-400">Last Updated</dt>
+              <dd className="text-sm text-gray-700 dark:text-gray-300">
                 {formatTimestamp(transaction.updatedAt)}
               </dd>
             </div>

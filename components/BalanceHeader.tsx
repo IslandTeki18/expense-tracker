@@ -9,9 +9,9 @@ export default function BalanceHeader({ isUnlocked }: { isUnlocked: boolean }) {
 
   if (result === undefined) {
     return (
-      <div className="rounded-lg bg-white p-6 shadow-sm">
-        <p className="text-sm font-medium text-gray-500">Working Balance</p>
-        <div className="mt-1 h-9 w-32 animate-pulse rounded bg-gray-200" />
+      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-900">
+        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Working Balance</p>
+        <div className="mt-1 h-9 w-32 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
       </div>
     );
   }
@@ -20,10 +20,10 @@ export default function BalanceHeader({ isUnlocked }: { isUnlocked: boolean }) {
   const isNegative = balanceCents < 0;
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow-sm">
-      <p className="text-sm font-medium text-gray-500">Working Balance</p>
+    <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-900">
+      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Working Balance</p>
       <p
-        className={`mt-1 text-3xl font-bold ${isNegative ? "text-red-600" : "text-gray-900"}`}
+        className={`mt-1 text-3xl font-bold ${isNegative ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-gray-100"}`}
       >
         {formatCents(balanceCents)}
       </p>

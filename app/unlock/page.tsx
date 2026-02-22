@@ -158,12 +158,12 @@ export default function UnlockPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-950">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-lg bg-white p-8 shadow-md"
+        className="w-full max-w-sm rounded-lg bg-white p-8 shadow-md dark:bg-gray-900"
       >
-        <h1 className="mb-6 text-center text-xl font-semibold text-gray-900">
+        <h1 className="mb-6 text-center text-xl font-semibold text-gray-900 dark:text-gray-100">
           Enter Passcode
         </h1>
 
@@ -184,13 +184,13 @@ export default function UnlockPage() {
               disabled={isDisabled}
               autoFocus={i === 0}
               autoComplete="off"
-              className="h-14 w-14 rounded-lg border-2 border-gray-300 text-center text-2xl font-bold text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100"
+              className="h-14 w-14 rounded-lg border-2 border-gray-300 text-center text-2xl font-bold text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:disabled:bg-gray-700"
             />
           ))}
         </div>
 
         {error && (
-          <p className="mb-4 text-center text-sm text-red-600">
+          <p className="mb-4 text-center text-sm text-red-600 dark:text-red-400">
             {error}
             {isCoolingDown && ` ${cooldownRemaining}s remaining.`}
           </p>

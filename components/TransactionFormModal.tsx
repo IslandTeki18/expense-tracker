@@ -188,16 +188,16 @@ export default function TransactionFormModal({
       onClick={handleClose}
     >
       <div
-        className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-lg"
+        className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h2>
           <button
             type="button"
             onClick={handleClose}
             disabled={isSubmitting}
-            className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+            className="text-gray-400 hover:text-gray-600 disabled:opacity-50 dark:text-gray-500 dark:hover:text-gray-300"
             aria-label="Close"
           >
             &#x2715;
@@ -205,7 +205,7 @@ export default function TransactionFormModal({
         </div>
 
         {submitError && (
-          <div className="mb-4 rounded bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-4 rounded bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
             {submitError}
           </div>
         )}
@@ -214,7 +214,7 @@ export default function TransactionFormModal({
           <div>
             <label
               htmlFor="amount"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Amount
             </label>
@@ -225,10 +225,10 @@ export default function TransactionFormModal({
               placeholder="0.00"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             />
             {fieldErrors.amountCents && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {fieldErrors.amountCents}
               </p>
             )}
@@ -237,7 +237,7 @@ export default function TransactionFormModal({
           <div>
             <label
               htmlFor="entryDate"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Date
             </label>
@@ -246,10 +246,10 @@ export default function TransactionFormModal({
               type="date"
               value={entryDate}
               onChange={(e) => setEntryDate(e.target.value)}
-              className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             />
             {fieldErrors.entryDate && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {fieldErrors.entryDate}
               </p>
             )}
@@ -258,7 +258,7 @@ export default function TransactionFormModal({
           <div>
             <label
               htmlFor="description"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Description{mode === "income" && " (optional)"}
             </label>
@@ -267,10 +267,10 @@ export default function TransactionFormModal({
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             />
             {fieldErrors.description && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {fieldErrors.description}
               </p>
             )}
@@ -279,7 +279,7 @@ export default function TransactionFormModal({
           <div>
             <label
               htmlFor="enteredBy"
-              className="mb-1 block text-sm font-medium text-gray-700"
+              className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Entered By
             </label>
@@ -287,13 +287,13 @@ export default function TransactionFormModal({
               id="enteredBy"
               value={enteredBy}
               onChange={(e) => setEnteredBy(e.target.value as Person)}
-              className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             >
               <option value="you">You</option>
               <option value="wife">Wife</option>
             </select>
             {fieldErrors.enteredBy && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {fieldErrors.enteredBy}
               </p>
             )}
@@ -304,7 +304,7 @@ export default function TransactionFormModal({
               <div>
                 <label
                   htmlFor="spentBy"
-                  className="mb-1 block text-sm font-medium text-gray-700"
+                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   Spent By
                 </label>
@@ -312,13 +312,13 @@ export default function TransactionFormModal({
                   id="spentBy"
                   value={spentBy}
                   onChange={(e) => setSpentBy(e.target.value as Person)}
-                  className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                 >
                   <option value="you">You</option>
                   <option value="wife">Wife</option>
                 </select>
                 {fieldErrors.spentBy && (
-                  <p className="mt-1 text-sm text-red-600">
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                     {fieldErrors.spentBy}
                   </p>
                 )}

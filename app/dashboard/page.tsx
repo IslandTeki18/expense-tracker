@@ -6,6 +6,7 @@ import { useAuth } from "@/components/AuthContext";
 import BalanceHeader from "@/components/BalanceHeader";
 import TransactionList from "@/components/TransactionList";
 import TransactionFormModal from "@/components/TransactionFormModal";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function DashboardPage() {
   const { isUnlocked, isLoading, lock } = useAuth();
@@ -22,19 +23,22 @@ export default function DashboardPage() {
   if (isLoading || !isUnlocked) return null;
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 sm:p-8">
+    <main className="min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-950">
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
-          <button
-            onClick={() => {
-              lock();
-              router.replace("/unlock");
-            }}
-            className="rounded bg-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-300"
-          >
-            Lock
-          </button>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => {
+                lock();
+                router.replace("/unlock");
+              }}
+              className="rounded bg-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+            >
+              Lock
+            </button>
+          </div>
         </div>
 
         <BalanceHeader isUnlocked={isUnlocked} />

@@ -60,7 +60,7 @@ export default function ReceiptUploader({
 
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-gray-700">
+      <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
         Receipt
       </label>
       {hasReceipt && !isUploading && (
@@ -74,12 +74,12 @@ export default function ReceiptUploader({
         accept="image/*,application/pdf"
         onChange={handleFileChange}
         disabled={disabled || isUploading}
-        className="block w-full text-sm text-gray-500 file:mr-3 file:rounded file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200 disabled:opacity-50"
+        className="block w-full text-sm text-gray-500 file:mr-3 file:rounded file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200 disabled:opacity-50 dark:text-gray-400 dark:file:bg-gray-700 dark:file:text-gray-300 dark:hover:file:bg-gray-600"
       />
       {isUploading && (
-        <p className="mt-1 text-sm text-gray-500">Uploading...</p>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Uploading...</p>
       )}
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
 }
