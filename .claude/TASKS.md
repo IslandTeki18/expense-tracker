@@ -346,42 +346,42 @@
 
 ### Frontend unit tests
 
-- [ ] money parsing/formatting tests complete
-- [ ] validation tests complete
+- [x] money parsing/formatting tests complete
+- [x] validation tests complete
 
 ### Backend unit tests (Convex)
 
-- [ ] createIncome creates container + version + sets activeVersionId
-- [ ] createExpense creates container + version + sets activeVersionId
-- [ ] editExpense creates new version and updates activeVersionId
-- [ ] history retrieval returns all versions
-- [ ] deleteTransaction removes container + versions + receipts
+- [x] createIncome creates container + version + sets activeVersionId
+- [x] createExpense creates container + version + sets activeVersionId
+- [x] editExpense creates new version and updates activeVersionId
+- [x] history retrieval returns all versions
+- [x] deleteTransaction removes container + versions + receipts
 
 ### Integration / manual scripts (happy path)
 
-- [ ] Unlock -> dashboard loads
-- [ ] Add income -> balance increases -> appears at top
-- [ ] Add expense -> balance decreases -> appears at top
-- [ ] Edit expense -> list updates -> history shows prior
-- [ ] Upload receipt -> view receipt works
-- [ ] Replace receipt -> old receipt inaccessible -> new receipt works
-- [ ] Delete -> removed everywhere -> balance correct
+- [x] Unlock -> dashboard loads
+- [x] Add income -> balance increases -> appears at top
+- [x] Add expense -> balance decreases -> appears at top
+- [x] Edit expense -> list updates -> history shows prior
+- [x] Upload receipt -> view receipt works
+- [x] Replace receipt -> old receipt inaccessible -> new receipt works
+- [x] Delete -> removed everywhere -> balance correct
 
 ### Edge cases
 
-- [ ] Negative balance allowed after expense
-- [ ] Blank date prevented by validation
-- [ ] Concurrent adds do not crash
-- [ ] Network failure shows retryable errors
+- [x] Negative balance allowed after expense
+- [x] Blank date prevented by validation
+- [x] Concurrent adds do not crash
+- [x] Network failure shows retryable errors
 
 ## 16) Deployment (Vercel + Convex)
 
-- [ ] Create Vercel project
-- [ ] Add env vars in Vercel
-  - [ ] Convex deployment values
-  - [ ] `PASSCODE_HASH`
-- [ ] Deploy Convex production deployment
-- [ ] Deploy Next.js to Vercel
+- [x] Create Vercel project
+- [x] Add env vars in Vercel
+  - [x] Convex deployment values
+  - [x] `PASSCODE_HASH`
+- [x] Deploy Convex production deployment
+- [x] Deploy Next.js to Vercel
 - [ ] Smoke test in production:
   - [ ] Locked state reveals no data
   - [ ] Unlock works
