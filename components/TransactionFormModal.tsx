@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { parseMoneyToCents } from "@/lib/money";
 import { validateIncome, validateExpense } from "@/lib/validation";
 import type { TxnType, Person } from "@/lib/types";
 import ReceiptUploader from "@/components/ReceiptUploader";
+import CategoryForm from "@/components/CategoryForm";
 
 interface EditData {
   transactionId: Id<"transactions">;
@@ -17,6 +18,7 @@ interface EditData {
   spentBy: Person | null;
   enteredBy: Person;
   receiptFileId?: Id<"_storage"> | null;
+  categoryId?: Id<"categories"> | null;
 }
 
 interface TransactionFormModalProps {
@@ -48,9 +50,15 @@ export default function TransactionFormModal({
     editData?.spentBy ?? "you",
   );
   const [receiptFileId, setReceiptFileId] = useState<Id<"_storage"> | null>(null);
+  const [categoryId, setCategoryId] = useState<Id<"categories"> | null>(
+    () => editData?.categoryId ?? null,
+  );
+  const [showQuickCreate, setShowQuickCreate] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const categories = useQuery(api.categories.listCategories);
 
   const createIncome = useMutation(api.transactions.createIncome);
   const createExpense = useMutation(api.transactions.createExpense);
@@ -146,6 +154,7 @@ export default function TransactionFormModal({
             enteredBy,
             description: trimmedDesc,
             spentBy,
+            categoryId: categoryId ?? null,
             ...(receiptFileId ? { receiptFileId } : {}),
           });
         } else {
@@ -155,6 +164,7 @@ export default function TransactionFormModal({
             enteredBy,
             description: trimmedDesc,
             spentBy,
+            categoryId: categoryId ?? null,
             ...(receiptFileId ? { receiptFileId } : {}),
           });
         }
@@ -323,6 +333,55 @@ export default function TransactionFormModal({
                   </p>
                 )}
               </div>
+              <div>
+                <label
+                  htmlFor="category"
+                  className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Category
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    {categoryId && categories && (
+                      <span
+                        className="pointer-events-none absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full"
+                        style={{
+                          backgroundColor: categories.find(
+                            (c) => c._id === categoryId,
+                          )?.color,
+                        }}
+                      />
+                    )}
+                    <select
+                      id="category"
+                      value={categoryId ?? ""}
+                      onChange={(e) =>
+                        setCategoryId(
+                          e.target.value
+                            ? (e.target.value as Id<"categories">)
+                            : null,
+                        )
+                      }
+                      className={`w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 ${categoryId ? "pl-8" : ""}`}
+                    >
+                      <option value="">Uncategorized</option>
+                      {categories?.map((cat) => (
+                        <option key={cat._id} value={cat._id}>
+                          {cat.nameDisplay}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowQuickCreate(true)}
+                    className="rounded border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                    title="Create new category"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
               <ReceiptUploader
                 onUploaded={(id) => setReceiptFileId(id)}
                 existingReceiptFileId={editData?.receiptFileId}
@@ -340,6 +399,10 @@ export default function TransactionFormModal({
           </button>
         </form>
       </div>
+
+      {showQuickCreate && (
+        <CategoryForm onClose={() => setShowQuickCreate(false)} />
+      )}
     </div>
   );
 }

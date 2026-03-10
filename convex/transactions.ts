@@ -171,6 +171,7 @@ export const getTransaction = query({
       spentBy: version.spentBy,
       enteredBy: version.enteredBy,
       receiptFileId: version.receiptFileId,
+      categoryId: txn.categoryId ?? null,
       versionCreatedAt: version.createdAt,
       activeVersionId: txn.activeVersionId,
     };

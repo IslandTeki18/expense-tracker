@@ -11,6 +11,7 @@ import { formatCents } from "@/lib/money";
 import HistoryPanel from "@/components/HistoryPanel";
 import TransactionFormModal from "@/components/TransactionFormModal";
 import ReceiptUploader from "@/components/ReceiptUploader";
+import CategoryBadge from "@/components/CategoryBadge";
 
 function formatPersonLabel(person: "you" | "wife"): string {
   return person === "you" ? "You" : "Wife";
@@ -43,6 +44,11 @@ export default function TransactionDetailPage() {
   const history = useQuery(
     api.transactions.listTransactionHistory,
     isUnlocked ? { transactionId } : "skip",
+  );
+
+  const categories = useQuery(
+    api.categories.listCategories,
+    isUnlocked ? {} : "skip",
   );
 
   const receiptUrl = useQuery(
@@ -216,6 +222,29 @@ export default function TransactionDetailPage() {
               </div>
             )}
 
+            {transaction.type === "expense" && (
+              <div className="flex items-center justify-between px-4 py-3">
+                <dt className="text-sm text-gray-500 dark:text-gray-400">Category</dt>
+                <dd>
+                  <CategoryBadge
+                    txnType="expense"
+                    categoryName={
+                      transaction.categoryId && categories
+                        ? (categories.find((c) => c._id === transaction.categoryId)
+                            ?.nameDisplay ?? null)
+                        : null
+                    }
+                    categoryColor={
+                      transaction.categoryId && categories
+                        ? (categories.find((c) => c._id === transaction.categoryId)
+                            ?.color ?? null)
+                        : null
+                    }
+                  />
+                </dd>
+              </div>
+            )}
+
             <div className="flex justify-between px-4 py-3">
               <dt className="text-sm text-gray-500 dark:text-gray-400">Entered By</dt>
               <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -294,6 +323,7 @@ export default function TransactionDetailPage() {
             spentBy: transaction.spentBy,
             enteredBy: transaction.enteredBy,
             receiptFileId: transaction.receiptFileId,
+            categoryId: transaction.categoryId,
           }}
         />
       )}
