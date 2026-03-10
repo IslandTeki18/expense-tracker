@@ -33,12 +33,12 @@ Indexes:
 
 Validation Rules:
 
-- [ ] Name max length: 30 characters
-- [ ] Name max words: 3
-- [ ] Trim leading/trailing whitespace
-- [ ] Collapse internal duplicate spaces
-- [ ] Normalize lowercase for uniqueness
-- [ ] Case-insensitive uniqueness enforcement
+- [x] Name max length: 30 characters
+- [x] Name max words: 3
+- [x] Trim leading/trailing whitespace
+- [x] Collapse internal duplicate spaces
+- [x] Normalize lowercase for uniqueness
+- [x] Case-insensitive uniqueness enforcement
 
 ---
 
@@ -62,26 +62,26 @@ Create shared helpers.
 
 Category Utilities:
 
-- [ ] Category name normalization helper
-- [ ] Word count validation helper
-- [ ] Duplicate space collapse helper
-- [ ] Case-insensitive uniqueness checker
+- [x] Category name normalization helper
+- [x] Word count validation helper
+- [x] Duplicate space collapse helper
+- [x] Case-insensitive uniqueness checker
 
 Sorting Utilities:
 
-- [ ] Derived category sort label generator
-- [ ] Category sort fallback for uncategorized
-- [ ] Category sort handling for income rows
+- [x] Derived category sort label generator
+- [x] Category sort fallback for uncategorized
+- [x] Category sort handling for income rows
 
 Date Utilities:
 
-- [ ] Date range validation helper
-- [ ] Date bucket helper for monthly grouping
+- [x] Date range validation helper
+- [x] Date bucket helper for monthly grouping
 
 Chart Utilities:
 
-- [ ] Chart color mapping from category color
-- [ ] Currency formatting helper
+- [x] Chart color mapping from category color
+- [x] Currency formatting helper
 
 ---
 
