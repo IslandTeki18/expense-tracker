@@ -91,47 +91,47 @@ Chart Utilities:
 
 ### Queries
 
-- [ ] `listCategories`
+- [x] `listCategories`
 
 Behavior:
 
-- [ ] Return alphabetical list
-- [ ] Include color + display name
+- [x] Return alphabetical list
+- [x] Include color + display name
 
 ### Mutations
 
 Create Category:
 
-- [ ] `createCategory`
-- [ ] Validate name
-- [ ] Validate color
-- [ ] Normalize name
-- [ ] Enforce uniqueness
+- [x] `createCategory`
+- [x] Validate name
+- [x] Validate color
+- [x] Normalize name
+- [x] Enforce uniqueness
 
 Update Category:
 
-- [ ] `updateCategory`
-- [ ] Allow rename
-- [ ] Allow color change
-- [ ] Prevent duplicates
+- [x] `updateCategory`
+- [x] Allow rename
+- [x] Allow color change
+- [x] Prevent duplicates
 
 Delete Category:
 
-- [ ] `deleteCategory`
+- [x] `deleteCategory`
 
 Behavior:
 
-- [ ] Find referencing transactions
-- [ ] Set `categoryId` to null
-- [ ] Hard delete category
-- [ ] Execute in single mutation
+- [x] Find referencing transactions
+- [x] Set `categoryId` to null
+- [x] Hard delete category
+- [x] Execute in single mutation
 
 Error Handling:
 
-- [ ] Duplicate name rejection
-- [ ] Invalid color rejection
-- [ ] Missing category rejection
-- [ ] Already-deleted category handling
+- [x] Duplicate name rejection
+- [x] Invalid color rejection
+- [x] Missing category rejection
+- [x] Already-deleted category handling
 
 ---
 
@@ -141,49 +141,49 @@ Extend transaction list query.
 
 Create:
 
-- [ ] `listTransactions`
+- [x] `listTransactions`
 
 Inputs:
 
-- [ ] page
-- [ ] pageSize
-- [ ] sortField
-- [ ] sortDirection
-- [ ] categoryFilter
+- [x] page
+- [x] pageSize
+- [x] sortField
+- [x] sortDirection
+- [x] categoryFilter
 
 Sorting Support:
 
-- [ ] date
-- [ ] amount
-- [ ] category
+- [x] date
+- [x] amount
+- [x] category
 
 Rules:
 
-- [ ] date uses `entryDate`
-- [ ] amount uses raw value
-- [ ] category uses derived sort label
+- [x] date uses `entryDate`
+- [x] amount uses raw value
+- [x] category uses derived sort label
 
 Filtering:
 
-- [ ] filter by categoryId
-- [ ] filter uncategorized
+- [x] filter by categoryId
+- [x] filter uncategorized
 
 Pagination:
 
-- [ ] page size 25
-- [ ] pagination after filters
-- [ ] pagination after sorting
+- [x] page size 25
+- [x] pagination after filters
+- [x] pagination after sorting
 
 Join Logic:
 
-- [ ] join categories
-- [ ] resolve category name
-- [ ] resolve category color
+- [x] join categories
+- [x] resolve category name
+- [x] resolve category color
 
 Fallbacks:
 
-- [ ] invalid sort defaults to date desc
-- [ ] invalid page defaults to page 1
+- [x] invalid sort defaults to date desc
+- [x] invalid page defaults to page 1
 
 ---
 
@@ -193,42 +193,42 @@ Create dashboard aggregation query.
 
 Create:
 
-- [ ] `getDashboardAnalytics`
+- [x] `getDashboardAnalytics`
 
 Inputs:
 
-- [ ] startDate
-- [ ] endDate
+- [x] startDate
+- [x] endDate
 
 Validation:
 
-- [ ] start required
-- [ ] end required
-- [ ] start <= end
+- [x] start required
+- [x] end required
+- [x] start <= end
 
 Output:
 
-- [ ] totalIncome
-- [ ] totalExpenses
-- [ ] transactionCount
-- [ ] pieChartData
-- [ ] monthlyBarChartData
-- [ ] topCategories
+- [x] totalIncome
+- [x] totalExpenses
+- [x] transactionCount
+- [x] pieChartData
+- [x] monthlyBarChartData
+- [x] topCategories
 
 Aggregation Tasks:
 
-- [ ] Filter by date range
-- [ ] Exclude invalid/missing dates
-- [ ] Compute totals
-- [ ] Compute category spending
-- [ ] Group uncategorized under "Other"
-- [ ] Fold small categories under threshold
-- [ ] Generate monthly buckets
-- [ ] Include income and expense data
+- [x] Filter by date range
+- [x] Exclude invalid/missing dates
+- [x] Compute totals
+- [x] Compute category spending
+- [x] Group uncategorized under "Other"
+- [x] Fold small categories under threshold
+- [x] Generate monthly buckets
+- [x] Include income and expense data
 
 Live Updates:
 
-- [ ] Ensure Convex reactivity
+- [x] Ensure Convex reactivity
 
 ---
 

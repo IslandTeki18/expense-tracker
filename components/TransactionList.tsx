@@ -4,15 +4,13 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import TransactionRow from "./TransactionRow";
 
-const LIST_LIMIT = 50;
-
 export default function TransactionList({ isUnlocked }: { isUnlocked: boolean }) {
-  const transactions = useQuery(
+  const result = useQuery(
     api.transactions.listTransactions,
-    isUnlocked ? { limit: LIST_LIMIT } : "skip",
+    isUnlocked ? {} : "skip",
   );
 
-  if (transactions === undefined) {
+  if (result === undefined) {
     return (
       <div className="rounded-lg bg-white shadow-sm dark:bg-gray-900">
         <div className="border-b border-gray-100 px-4 py-3 dark:border-gray-800">
@@ -27,7 +25,7 @@ export default function TransactionList({ isUnlocked }: { isUnlocked: boolean })
     );
   }
 
-  if (transactions.length === 0) {
+  if (result.transactions.length === 0) {
     return (
       <div className="rounded-lg bg-white p-8 text-center shadow-sm dark:bg-gray-900">
         <p className="text-sm text-gray-500 dark:text-gray-400">No transactions yet.</p>
@@ -37,7 +35,7 @@ export default function TransactionList({ isUnlocked }: { isUnlocked: boolean })
 
   return (
     <div className="rounded-lg bg-white shadow-sm dark:bg-gray-900">
-      {transactions.map((txn) => (
+      {result.transactions.map((txn) => (
         <TransactionRow key={txn._id} txn={txn} />
       ))}
     </div>

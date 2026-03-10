@@ -39,26 +39,60 @@ export const getBalance = query({
   },
 });
 
-export const listTransactions = query({
-  args: { limit: v.number() },
-  handler: async (ctx, { limit }) => {
-    const transactions = await ctx.db
-      .query("transactions")
-      .withIndex("by_createdAt")
-      .order("desc")
-      .take(limit);
+const VALID_SORT_FIELDS = ["date", "amount", "category"] as const;
+const VALID_SORT_DIRECTIONS = ["asc", "desc"] as const;
+const DEFAULT_PAGE_SIZE = 25;
 
-    const results = [];
-    for (const txn of transactions) {
+export const listTransactions = query({
+  args: {
+    page: v.optional(v.number()),
+    pageSize: v.optional(v.number()),
+    sortField: v.optional(v.string()),
+    sortDirection: v.optional(v.string()),
+    categoryFilter: v.optional(
+      v.union(v.id("categories"), v.literal("uncategorized"), v.null()),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const page = args.page && args.page >= 1 ? Math.floor(args.page) : 1;
+    const pageSize = args.pageSize && args.pageSize >= 1
+      ? Math.floor(args.pageSize)
+      : DEFAULT_PAGE_SIZE;
+    const sortField = (VALID_SORT_FIELDS as readonly string[]).includes(args.sortField ?? "")
+      ? (args.sortField as (typeof VALID_SORT_FIELDS)[number])
+      : "date";
+    const sortDirection = (VALID_SORT_DIRECTIONS as readonly string[]).includes(args.sortDirection ?? "")
+      ? (args.sortDirection as (typeof VALID_SORT_DIRECTIONS)[number])
+      : "desc";
+
+    const allTransactions = await ctx.db.query("transactions").collect();
+
+    // Build enriched rows with version + category data
+    const rows = [];
+    for (const txn of allTransactions) {
       if (!txn.activeVersionId) continue;
       const version = await ctx.db.get(txn.activeVersionId);
       if (!version) continue;
-      results.push({
+
+      let categoryName: string | null = null;
+      let categoryColor: string | null = null;
+      if (txn.categoryId) {
+        const cat = await ctx.db.get(txn.categoryId);
+        if (cat) {
+          categoryName = cat.nameDisplay;
+          categoryColor = cat.color;
+        }
+      }
+
+      rows.push({
         _id: txn._id,
         type: txn.type,
         createdAt: txn.createdAt,
         createdBy: txn.createdBy,
         updatedAt: txn.updatedAt,
+        categoryId: txn.categoryId ?? null,
+        categoryName,
+        categoryColor,
         amountCents: version.amountCents,
         entryDate: version.entryDate,
         description: version.description,
@@ -68,9 +102,55 @@ export const listTransactions = query({
         versionCreatedAt: version.createdAt,
       });
     }
-    return results;
+
+    // Filter by category
+    let filtered = rows;
+    if (args.categoryFilter === "uncategorized") {
+      filtered = rows.filter((r) => r.type === "expense" && !r.categoryId);
+    } else if (args.categoryFilter != null) {
+      filtered = rows.filter((r) => r.categoryId === args.categoryFilter);
+    }
+
+    // Sort
+    const dir = sortDirection === "asc" ? 1 : -1;
+    filtered.sort((a, b) => {
+      let cmp = 0;
+      if (sortField === "date") {
+        cmp = (a.entryDate ?? "").localeCompare(b.entryDate ?? "");
+      } else if (sortField === "amount") {
+        cmp = a.amountCents - b.amountCents;
+      } else if (sortField === "category") {
+        const labelA = getCatSortLabel(a.type, a.categoryName);
+        const labelB = getCatSortLabel(b.type, b.categoryName);
+        cmp = labelA.localeCompare(labelB);
+      }
+      return cmp === 0 ? b.createdAt - a.createdAt : cmp * dir;
+    });
+
+    // Paginate
+    const totalCount = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+    const offset = (page - 1) * pageSize;
+    const paged = filtered.slice(offset, offset + pageSize);
+
+    return {
+      transactions: paged,
+      totalCount,
+      totalPages,
+      page,
+      pageSize,
+    };
   },
 });
+
+function getCatSortLabel(
+  txnType: string,
+  categoryName: string | null,
+): string {
+  if (txnType === "income") return "\uffff_INCOME";
+  if (!categoryName) return "\uffff_UNCATEGORIZED";
+  return categoryName.toLowerCase();
+}
 
 export const getTransaction = query({
   args: { transactionId: v.id("transactions") },
