@@ -27,6 +27,11 @@ function formatPersonLabel(person: "you" | "wife"): string {
   return person === "you" ? "You" : "Wife";
 }
 
+function formatDateShort(dateStr: string): string {
+  const [year, month, day] = dateStr.split("-");
+  return `${month}/${day}/${year.slice(2)}`;
+}
+
 export default function TransactionRow({ txn }: { txn: TransactionRowData }) {
   const isIncome = txn.type === "income";
 
@@ -55,7 +60,14 @@ export default function TransactionRow({ txn }: { txn: TransactionRowData }) {
       </span>
 
       <span className="text-sm text-gray-500 sm:w-24 sm:shrink-0 dark:text-gray-400">
-        {txn.entryDate ?? "--"}
+        {txn.entryDate ? (
+          <>
+            <span className="sm:hidden">{formatDateShort(txn.entryDate)}</span>
+            <span className="hidden sm:inline">{txn.entryDate}</span>
+          </>
+        ) : (
+          "--"
+        )}
       </span>
 
       <span className="min-w-0 w-full flex-1 truncate text-sm text-gray-900 sm:w-auto dark:text-gray-100">
