@@ -15,21 +15,21 @@
 
 ## Categories Table
 
-- [ ] Create `categories` table in Convex
+- [x] Create `categories` table in Convex
 
 Fields:
 
-- [ ] `_id`
-- [ ] `nameDisplay`
-- [ ] `nameNormalized`
-- [ ] `color`
-- [ ] `createdAt`
-- [ ] `updatedAt`
+- [x] `_id`
+- [x] `nameDisplay`
+- [x] `nameNormalized`
+- [x] `color`
+- [x] `createdAt`
+- [x] `updatedAt`
 
 Indexes:
 
-- [ ] Unique index on `nameNormalized`
-- [ ] Optional alphabetical index on `nameDisplay`
+- [x] Unique index on `nameNormalized`
+- [x] Optional alphabetical index on `nameDisplay`
 
 Validation Rules:
 
@@ -44,15 +44,15 @@ Validation Rules:
 
 ## Transactions Table Changes
 
-- [ ] Add `categoryId?: Id<"categories"> | null`
-- [ ] Ensure `entryDate` is standardized
-- [ ] Ensure transaction type field exists
+- [x] Add `categoryId?: Id<"categories"> | null`
+- [x] Ensure `entryDate` is standardized
+- [x] Ensure transaction type field exists
 
 Rules:
 
-- [ ] Income must not allow categoryId
-- [ ] Expense may have null category
-- [ ] No denormalized category data stored on transactions
+- [x] Income must not allow categoryId
+- [x] Expense may have null category
+- [x] No denormalized category data stored on transactions
 
 ---
 

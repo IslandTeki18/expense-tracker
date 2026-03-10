@@ -2,9 +2,20 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  categories: defineTable({
+    nameDisplay: v.string(),
+    nameNormalized: v.string(),
+    color: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_nameNormalized", ["nameNormalized"])
+    .index("by_nameDisplay", ["nameDisplay"]),
+
   transactions: defineTable({
     type: v.union(v.literal("income"), v.literal("expense")),
     activeVersionId: v.union(v.id("transaction_versions"), v.null()),
+    categoryId: v.optional(v.union(v.id("categories"), v.null())),
     createdAt: v.number(),
     createdBy: v.union(v.literal("you"), v.literal("wife")),
     updatedAt: v.number(),

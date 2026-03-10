@@ -164,10 +164,11 @@ export const editExpense = mutation({
     spentBy: v.union(v.literal("you"), v.literal("wife")),
     enteredBy: v.union(v.literal("you"), v.literal("wife")),
     receiptFileId: v.optional(v.union(v.id("_storage"), v.null())),
+    categoryId: v.optional(v.union(v.id("categories"), v.null())),
   },
   handler: async (
     ctx,
-    { transactionId, amountCents, entryDate, description, spentBy, enteredBy, receiptFileId: newReceiptFileId },
+    { transactionId, amountCents, entryDate, description, spentBy, enteredBy, receiptFileId: newReceiptFileId, categoryId },
   ) => {
     const txn = await ctx.db.get(transactionId);
     if (!txn) throw new Error("Transaction not found");
@@ -177,6 +178,11 @@ export const editExpense = mutation({
     assertPositiveCents(amountCents);
     assertValidDate(entryDate);
     assertNonEmpty(description, "description");
+
+    if (categoryId) {
+      const category = await ctx.db.get(categoryId);
+      if (!category) throw new Error("Category not found");
+    }
 
     const oldActiveVersionId = txn.activeVersionId;
     const now = Date.now();
@@ -210,10 +216,14 @@ export const editExpense = mutation({
       supersedesVersionId: oldActiveVersionId,
     });
 
-    await ctx.db.patch(transactionId, {
+    const patchData: Record<string, unknown> = {
       activeVersionId: newVersionId,
       updatedAt: now,
-    });
+    };
+    if (categoryId !== undefined) {
+      patchData.categoryId = categoryId;
+    }
+    await ctx.db.patch(transactionId, patchData);
 
     // Delete old receipt file if it was replaced
     if (newReceiptFileId !== undefined && oldReceiptFileId && oldReceiptFileId !== newReceiptFileId) {
@@ -356,20 +366,27 @@ export const createExpense = mutation({
     spentBy: v.union(v.literal("you"), v.literal("wife")),
     enteredBy: v.union(v.literal("you"), v.literal("wife")),
     receiptFileId: v.optional(v.union(v.id("_storage"), v.null())),
+    categoryId: v.optional(v.union(v.id("categories"), v.null())),
   },
   handler: async (
     ctx,
-    { amountCents, entryDate, description, spentBy, enteredBy, receiptFileId },
+    { amountCents, entryDate, description, spentBy, enteredBy, receiptFileId, categoryId },
   ) => {
     assertPositiveCents(amountCents);
     assertValidDate(entryDate);
     assertNonEmpty(description, "description");
+
+    if (categoryId) {
+      const category = await ctx.db.get(categoryId);
+      if (!category) throw new Error("Category not found");
+    }
 
     const now = Date.now();
 
     const txnId = await ctx.db.insert("transactions", {
       type: "expense",
       activeVersionId: null,
+      categoryId: categoryId ?? null,
       createdAt: now,
       createdBy: enteredBy,
       updatedAt: now,
