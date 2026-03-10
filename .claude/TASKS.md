@@ -402,15 +402,15 @@ Income Form:
 
 Route:
 
-- [ ] `/dashboard`
+- [x] `/dashboard`
 
 Page Components:
 
-- [ ] `DashboardSummaryCards`
-- [ ] `CategoryPieChart`
-- [ ] `MonthlyIncomeExpenseChart`
-- [ ] `TopCategoriesList`
-- [ ] `DateRangePicker`
+- [x] `DashboardSummaryCards`
+- [x] `CategoryPieChart`
+- [x] `MonthlyIncomeExpenseChart`
+- [x] `TopCategoriesList`
+- [x] `DateRangePicker`
 
 ---
 
@@ -418,17 +418,17 @@ Page Components:
 
 Behavior:
 
-- [ ] Custom range selection
-- [ ] Persist last selection in local storage
-- [ ] Default to current month
+- [x] Custom range selection
+- [x] Persist last selection in local storage
+- [x] Default to current month
 
 UI:
 
-- [ ] Visible range display
+- [x] Visible range display
 
 Example:
 
-- [ ] `Jan 1 – Jan 31, 2026`
+- [x] `Jan 1 – Jan 31, 2026`
 
 ---
 
@@ -436,9 +436,9 @@ Example:
 
 Display:
 
-- [ ] Total income
-- [ ] Total expenses
-- [ ] Transaction count
+- [x] Total income
+- [x] Total expenses
+- [x] Transaction count
 
 ---
 
@@ -446,17 +446,17 @@ Display:
 
 Library:
 
-- [ ] Chart.js
-- [ ] react-chartjs-2
+- [x] Chart.js
+- [x] react-chartjs-2
 
 Rules:
 
-- [ ] Expenses only
-- [ ] Category colors used
-- [ ] "Other" bucket for small categories
-- [ ] Tooltip with currency
-- [ ] Percentage labels
-- [ ] Legend highlight on click
+- [x] Expenses only
+- [x] Category colors used
+- [x] "Other" bucket for small categories
+- [x] Tooltip with currency
+- [x] Percentage labels
+- [x] Legend highlight on click
 
 ---
 
@@ -464,15 +464,15 @@ Rules:
 
 Display:
 
-- [ ] Monthly aggregated bars
-- [ ] Income + expense stacked
-- [ ] Tooltip currency formatting
+- [x] Monthly aggregated bars
+- [x] Income + expense stacked
+- [x] Tooltip currency formatting
 
 Rules:
 
-- [ ] Static render
-- [ ] Responsive
-- [ ] Resize aware
+- [x] Static render
+- [x] Responsive
+- [x] Resize aware
 
 ---
 
@@ -480,8 +480,8 @@ Rules:
 
 Display:
 
-- [ ] Ranked by spending
-- [ ] Uses selected date range
+- [x] Ranked by spending
+- [x] Uses selected date range
 
 ---
 
@@ -489,12 +489,12 @@ Display:
 
 Loading:
 
-- [ ] Skeleton UI
+- [x] Skeleton UI
 
 Empty Range:
 
-- [ ] Render charts with zero values
-- [ ] Do not hide charts
+- [x] Render charts with zero values
+- [x] Do not hide charts
 
 ---
 
