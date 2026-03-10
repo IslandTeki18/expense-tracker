@@ -374,27 +374,27 @@ Modify existing expense form.
 
 Add:
 
-- [ ] Category dropdown
-- [ ] Category color indicator
+- [x] Category dropdown
+- [x] Category color indicator
 
 Dropdown Behavior:
 
-- [ ] Alphabetical ordering
-- [ ] Explicit "Uncategorized" option
+- [x] Alphabetical ordering
+- [x] Explicit "Uncategorized" option
 
 Quick Create:
 
-- [ ] Inline category creation
-- [ ] Auto refresh category list
+- [x] Inline category creation
+- [x] Auto refresh category list
 
 Edit Behavior:
 
-- [ ] Allow removing category
-- [ ] Reset to uncategorized
+- [x] Allow removing category
+- [x] Reset to uncategorized
 
 Income Form:
 
-- [ ] No category support
+- [x] No category support
 
 ---
 
