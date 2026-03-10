@@ -52,7 +52,10 @@ export default function MonthlyIncomeExpenseChart({
         stacked: true,
         ticks: {
           color: labelColor,
-          callback: (value) => formatCents(Number(value)),
+          callback: (value) => {
+            const num = Number(value);
+            return Number.isInteger(num) ? formatCents(num) : "";
+          },
         },
         grid: { color: gridColor },
       },
