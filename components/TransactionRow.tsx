@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { formatCents } from "@/lib/money";
 import { Id } from "@/convex/_generated/dataModel";
+import CategoryBadge from "./CategoryBadge";
 
 export interface TransactionRowData {
   _id: Id<"transactions">;
@@ -10,6 +11,9 @@ export interface TransactionRowData {
   createdAt: number;
   createdBy: "you" | "wife";
   updatedAt: number;
+  categoryId: Id<"categories"> | null;
+  categoryName: string | null;
+  categoryColor: string | null;
   amountCents: number;
   entryDate: string | null;
   description: string | null;
@@ -57,6 +61,12 @@ export default function TransactionRow({ txn }: { txn: TransactionRowData }) {
       <span className="min-w-0 w-full flex-1 truncate text-sm text-gray-900 sm:w-auto dark:text-gray-100">
         {txn.description ?? ""}
       </span>
+
+      <CategoryBadge
+        txnType={txn.type}
+        categoryName={txn.categoryName}
+        categoryColor={txn.categoryColor}
+      />
 
       {txn.type === "expense" && txn.spentBy && (
         <span className="shrink-0 text-xs text-gray-500 dark:text-gray-400">

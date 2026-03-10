@@ -238,26 +238,26 @@ Live Updates:
 
 Create component:
 
-- [ ] `TransactionTable`
+- [x] `TransactionTable`
 
 Columns:
 
-- [ ] Date
-- [ ] Amount
-- [ ] Category
-- [ ] Transaction type context
+- [x] Date
+- [x] Amount
+- [x] Category
+- [x] Transaction type context
 
 Row Rendering:
 
-- [ ] Expense with category badge
-- [ ] Uncategorized expense badge ("Other")
-- [ ] Income badge ("Income")
-- [ ] Amount color styling
+- [x] Expense with category badge
+- [x] Uncategorized expense badge ("Other")
+- [x] Income badge ("Income")
+- [x] Amount color styling
 
 Date Display:
 
-- [ ] Exact calendar date
-- [ ] No relative time
+- [x] Exact calendar date
+- [x] No relative time
 
 ---
 
@@ -265,20 +265,20 @@ Date Display:
 
 Create component:
 
-- [ ] `TransactionSortHeader`
+- [x] `TransactionSortHeader`
 
 Features:
 
-- [ ] Sort by date
-- [ ] Sort by amount
-- [ ] Sort by category
-- [ ] Display active sort direction
+- [x] Sort by date
+- [x] Sort by amount
+- [x] Sort by category
+- [x] Display active sort direction
 
 Behavior:
 
-- [ ] Default sort: date descending
-- [ ] Reset sort on page load
-- [ ] Do not persist preferences
+- [x] Default sort: date descending
+- [x] Reset sort on page load
+- [x] Do not persist preferences
 
 ---
 
@@ -286,14 +286,14 @@ Behavior:
 
 Create:
 
-- [ ] `CategoryBadge`
+- [x] `CategoryBadge`
 
 Behavior:
 
-- [ ] Colored badge
-- [ ] Category name display
-- [ ] Gray badge for uncategorized
-- [ ] Green badge for income
+- [x] Colored badge
+- [x] Category name display
+- [x] Gray badge for uncategorized
+- [x] Green badge for income
 
 ---
 
@@ -301,18 +301,18 @@ Behavior:
 
 Create:
 
-- [ ] `CategoryFilterControl`
+- [x] `CategoryFilterControl`
 
 Features:
 
-- [ ] Filter by category
-- [ ] Click badge to filter
-- [ ] Include uncategorized filter
+- [x] Filter by category
+- [x] Click badge to filter
+- [x] Include uncategorized filter
 
 Compatibility:
 
-- [ ] Works with sorting
-- [ ] Works with pagination
+- [x] Works with sorting
+- [x] Works with pagination
 
 ---
 
@@ -320,13 +320,13 @@ Compatibility:
 
 Implement:
 
-- [ ] Pagination control
+- [x] Pagination control
 
 Rules:
 
-- [ ] Page size 25
-- [ ] Full dataset sorting preserved
-- [ ] Filters applied before pagination
+- [x] Page size 25
+- [x] Full dataset sorting preserved
+- [x] Filters applied before pagination
 
 ---
 
