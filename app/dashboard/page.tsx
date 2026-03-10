@@ -8,6 +8,7 @@ import BalanceHeader from "@/components/BalanceHeader";
 import TransactionList from "@/components/TransactionList";
 import TransactionFormModal from "@/components/TransactionFormModal";
 import ThemeToggle from "@/components/ThemeToggle";
+import DashboardAnalytics from "@/components/DashboardAnalytics";
 
 export default function DashboardPage() {
   const { isUnlocked, isLoading, lock } = useAuth();
@@ -25,7 +26,7 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-950">
-      <div className="mx-auto max-w-2xl space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
           <div className="flex items-center gap-2">
@@ -64,6 +65,8 @@ export default function DashboardPage() {
             Add Expense
           </button>
         </div>
+
+        <DashboardAnalytics isUnlocked={isUnlocked} />
 
         <TransactionList isUnlocked={isUnlocked} />
 
