@@ -32,7 +32,7 @@ export default function TransactionSortHeader({
   ];
 
   return (
-    <div className="flex items-center gap-4 border-b border-gray-200 bg-gray-50 px-4 py-2 text-xs font-medium text-gray-500 uppercase dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400">
+    <div className="hidden items-center gap-4 border-b border-gray-200 bg-gray-50 px-4 py-2 text-xs font-medium text-gray-500 uppercase sm:flex dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400">
       {columns.map((col) => (
         <button
           key={col.field}

@@ -34,67 +34,97 @@ function formatDateShort(dateStr: string): string {
 
 export default function TransactionRow({ txn }: { txn: TransactionRowData }) {
   const isIncome = txn.type === "income";
+  const amountColor = isIncome
+    ? "text-green-700 dark:text-green-400"
+    : "text-red-700 dark:text-red-400";
 
   return (
     <Link
       href={`/transaction/${txn._id}`}
-      className="flex cursor-pointer flex-wrap items-center gap-2 border-b border-gray-100 px-4 py-3 last:border-b-0 hover:bg-gray-50 sm:flex-nowrap sm:gap-4 dark:border-gray-800 dark:hover:bg-gray-800"
+      className="block border-b border-gray-100 px-4 py-3 last:border-b-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800"
     >
-      <span
-        className={`inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium sm:w-18 sm:shrink-0 ${
-          isIncome
-            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-            : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-        }`}
-      >
-        {isIncome ? "Income" : "Expense"}
-      </span>
+      {/* Mobile: two-line card layout */}
+      <div className="sm:hidden">
+        <div className="flex items-center gap-2">
+          <CategoryBadge
+            txnType={txn.type}
+            categoryName={txn.categoryName}
+            categoryColor={txn.categoryColor}
+          />
+          <span className="min-w-0 flex-1 truncate text-sm text-gray-900 dark:text-gray-100">
+            {txn.description ?? ""}
+          </span>
+        </div>
+        <div className="mt-1 flex items-center justify-between">
+          <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+            {txn.entryDate ? formatDateShort(txn.entryDate) : "--"}
+            {txn.type === "expense" && txn.spentBy && (
+              <>
+                <span>&middot;</span>
+                <span>by {formatPersonLabel(txn.spentBy)}</span>
+              </>
+            )}
+            {txn.receiptFileId && (
+              <>
+                <span>&middot;</span>
+                <span className="text-blue-500" title="Has receipt">receipt</span>
+              </>
+            )}
+          </span>
+          <span className={`text-sm font-semibold ${amountColor}`}>
+            {isIncome ? "+" : "-"}
+            {formatCents(txn.amountCents)}
+          </span>
+        </div>
+      </div>
 
-      <span
-        className={`text-right text-sm font-semibold sm:w-24 sm:shrink-0 ${
-          isIncome ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"
-        }`}
-      >
-        {isIncome ? "+" : "-"}
-        {formatCents(txn.amountCents)}
-      </span>
+      {/* Desktop: horizontal row layout */}
+      <div className="hidden sm:flex sm:items-center sm:gap-4">
+        <span
+          className={`inline-flex w-18 shrink-0 items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+            isIncome
+              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+          }`}
+        >
+          {isIncome ? "Income" : "Expense"}
+        </span>
 
-      <span className="text-sm text-gray-500 sm:w-24 sm:shrink-0 dark:text-gray-400">
-        {txn.entryDate ? (
-          <>
-            <span className="sm:hidden">{formatDateShort(txn.entryDate)}</span>
-            <span className="hidden sm:inline">{txn.entryDate}</span>
-          </>
-        ) : (
-          "--"
+        <span className={`w-24 shrink-0 text-right text-sm font-semibold ${amountColor}`}>
+          {isIncome ? "+" : "-"}
+          {formatCents(txn.amountCents)}
+        </span>
+
+        <span className="w-24 shrink-0 text-sm text-gray-500 dark:text-gray-400">
+          {txn.entryDate ? txn.entryDate : "--"}
+        </span>
+
+        <span className="min-w-0 flex-1 truncate text-sm text-gray-900 dark:text-gray-100">
+          {txn.description ?? ""}
+        </span>
+
+        <CategoryBadge
+          txnType={txn.type}
+          categoryName={txn.categoryName}
+          categoryColor={txn.categoryColor}
+        />
+
+        {txn.type === "expense" && txn.spentBy && (
+          <span className="shrink-0 text-xs text-gray-500 dark:text-gray-400">
+            by {formatPersonLabel(txn.spentBy)}
+          </span>
         )}
-      </span>
 
-      <span className="min-w-0 w-full flex-1 truncate text-sm text-gray-900 sm:w-auto dark:text-gray-100">
-        {txn.description ?? ""}
-      </span>
-
-      <CategoryBadge
-        txnType={txn.type}
-        categoryName={txn.categoryName}
-        categoryColor={txn.categoryColor}
-      />
-
-      {txn.type === "expense" && txn.spentBy && (
-        <span className="shrink-0 text-xs text-gray-500 dark:text-gray-400">
-          by {formatPersonLabel(txn.spentBy)}
+        <span className="shrink-0 text-xs text-gray-400 dark:text-gray-500">
+          {formatPersonLabel(txn.enteredBy)}
         </span>
-      )}
 
-      <span className="shrink-0 text-xs text-gray-400 dark:text-gray-500">
-        {formatPersonLabel(txn.enteredBy)}
-      </span>
-
-      {txn.receiptFileId && (
-        <span className="shrink-0 text-xs text-blue-500" title="Has receipt">
-          receipt
-        </span>
-      )}
+        {txn.receiptFileId && (
+          <span className="shrink-0 text-xs text-blue-500" title="Has receipt">
+            receipt
+          </span>
+        )}
+      </div>
     </Link>
   );
 }
