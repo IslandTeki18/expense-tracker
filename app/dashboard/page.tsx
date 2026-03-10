@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/components/AuthContext";
 import BalanceHeader from "@/components/BalanceHeader";
 import TransactionList from "@/components/TransactionList";
@@ -28,6 +29,12 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
           <div className="flex items-center gap-2">
+            <Link
+              href="/settings/categories"
+              className="rounded bg-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+            >
+              Categories
+            </Link>
             <ThemeToggle />
             <button
               onClick={() => {

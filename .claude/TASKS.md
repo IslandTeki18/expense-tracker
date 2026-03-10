@@ -334,37 +334,37 @@ Rules:
 
 Route:
 
-- [ ] `/settings/categories`
+- [x] `/settings/categories`
 
 Create components:
 
-- [ ] `CategoryForm`
-- [ ] `CategoryList`
-- [ ] `CategoryDeleteDialog`
+- [x] `CategoryForm`
+- [x] `CategoryList`
+- [x] `CategoryDeleteDialog`
 
 Features:
 
-- [ ] Create category
-- [ ] Edit category
-- [ ] Delete category
+- [x] Create category
+- [x] Edit category
+- [x] Delete category
 
 Form Fields:
 
-- [ ] Name
-- [ ] Color picker
+- [x] Name
+- [x] Color picker
 
 Validation:
 
-- [ ] Name required
-- [ ] Max 30 characters
-- [ ] Max 3 words
-- [ ] Duplicate detection
+- [x] Name required
+- [x] Max 30 characters
+- [x] Max 3 words
+- [x] Duplicate detection
 
 Delete Behavior:
 
-- [ ] Confirmation dialog
-- [ ] Hard delete
-- [ ] Transactions uncategorized automatically
+- [x] Confirmation dialog
+- [x] Hard delete
+- [x] Transactions uncategorized automatically
 
 ---
 
