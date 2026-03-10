@@ -26,7 +26,7 @@ export default function TransactionSortHeader({
   onSort,
 }: TransactionSortHeaderProps) {
   const columns: { field: SortField; label: string; className: string }[] = [
-    { field: "category", label: "Category", className: "flex-1" },
+    { field: "category", label: "Category", className: "w-24" },
     { field: "amount", label: "Amount", className: "w-24" },
     { field: "date", label: "Date", className: "w-24" },
   ];
