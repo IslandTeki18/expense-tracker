@@ -502,33 +502,33 @@ Empty Range:
 
 Category Errors:
 
-- [ ] Duplicate name
-- [ ] Too many words
-- [ ] Name too long
-- [ ] Invalid color
+- [x] Duplicate name
+- [x] Too many words
+- [x] Name too long
+- [x] Invalid color
 
 Transaction Errors:
 
-- [ ] Assigning category to income
-- [ ] Invalid category reference
+- [x] Assigning category to income
+- [x] Invalid category reference
 
 Dashboard Errors:
 
-- [ ] Invalid date range
-- [ ] Dashboard query failure
-- [ ] Missing categories
+- [x] Invalid date range
+- [x] Dashboard query failure
+- [x] Missing categories
 
 Transaction List Errors:
 
-- [ ] Invalid sort field
-- [ ] Invalid sort direction
-- [ ] Invalid page
-- [ ] Invalid category filter
+- [x] Invalid sort field
+- [x] Invalid sort direction
+- [x] Invalid page
+- [x] Invalid category filter
 
 Fallbacks:
 
-- [ ] Default sort fallback
-- [ ] Graceful empty states
+- [x] Default sort fallback
+- [x] Graceful empty states
 
 ---
 

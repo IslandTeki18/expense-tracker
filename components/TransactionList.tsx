@@ -12,6 +12,7 @@ import CategoryFilterControl, {
   type CategoryFilterValue,
 } from "./CategoryFilterControl";
 import PaginationControl from "./PaginationControl";
+import QueryErrorBoundary from "./QueryErrorBoundary";
 
 export default function TransactionList({ isUnlocked }: { isUnlocked: boolean }) {
   const [page, setPage] = useState(1);
@@ -54,43 +55,45 @@ export default function TransactionList({ isUnlocked }: { isUnlocked: boolean })
         onChange={handleFilterChange}
       />
 
-      <div className="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-900">
-        <TransactionSortHeader
-          sortField={sortField}
-          sortDirection={sortDirection}
-          onSort={handleSort}
-        />
+      <QueryErrorBoundary fallbackMessage="Failed to load transactions. Please try again.">
+        <div className="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-gray-900">
+          <TransactionSortHeader
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+          />
 
-        {result === undefined ? (
-          <div>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                className="border-b border-gray-100 px-4 py-3 last:border-b-0 dark:border-gray-800"
-              >
-                <div className="h-5 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-              </div>
-            ))}
-          </div>
-        ) : result.transactions.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              No transactions found.
-            </p>
-          </div>
-        ) : (
-          <>
-            {result.transactions.map((txn) => (
-              <TransactionRow key={txn._id} txn={txn} />
-            ))}
-            <PaginationControl
-              page={result.page}
-              totalPages={result.totalPages}
-              onPageChange={setPage}
-            />
-          </>
-        )}
-      </div>
+          {result === undefined ? (
+            <div>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="border-b border-gray-100 px-4 py-3 last:border-b-0 dark:border-gray-800"
+                >
+                  <div className="h-5 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                </div>
+              ))}
+            </div>
+          ) : result.transactions.length === 0 ? (
+            <div className="p-8 text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No transactions found.
+              </p>
+            </div>
+          ) : (
+            <>
+              {result.transactions.map((txn) => (
+                <TransactionRow key={txn._id} txn={txn} />
+              ))}
+              <PaginationControl
+                page={result.page}
+                totalPages={result.totalPages}
+                onPageChange={setPage}
+              />
+            </>
+          )}
+        </div>
+      </QueryErrorBoundary>
     </div>
   );
 }
