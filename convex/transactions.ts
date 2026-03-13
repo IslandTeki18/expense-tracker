@@ -52,6 +52,8 @@ export const listTransactions = query({
     categoryFilter: v.optional(
       v.union(v.id("categories"), v.literal("uncategorized"), v.null()),
     ),
+    startDate: v.optional(v.string()),
+    endDate: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const page = args.page && args.page >= 1 ? Math.floor(args.page) : 1;
@@ -103,8 +105,20 @@ export const listTransactions = query({
       });
     }
 
-    // Filter by category
+    // Filter by date range
     let filtered = rows;
+    if (args.startDate) {
+      filtered = filtered.filter(
+        (r) => r.entryDate != null && r.entryDate >= args.startDate!,
+      );
+    }
+    if (args.endDate) {
+      filtered = filtered.filter(
+        (r) => r.entryDate != null && r.entryDate <= args.endDate!,
+      );
+    }
+
+    // Filter by category
     if (args.categoryFilter === "uncategorized") {
       filtered = rows.filter((r) => r.type === "expense" && !r.categoryId);
     } else if (args.categoryFilter != null) {

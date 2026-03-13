@@ -14,7 +14,13 @@ import CategoryFilterControl, {
 import PaginationControl from "./PaginationControl";
 import QueryErrorBoundary from "./QueryErrorBoundary";
 
-export default function TransactionList({ isUnlocked }: { isUnlocked: boolean }) {
+interface TransactionListProps {
+  isUnlocked: boolean;
+  startDate?: string;
+  endDate?: string;
+}
+
+export default function TransactionList({ isUnlocked, startDate, endDate }: TransactionListProps) {
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
@@ -43,6 +49,8 @@ export default function TransactionList({ isUnlocked }: { isUnlocked: boolean })
           sortField,
           sortDirection,
           categoryFilter,
+          startDate,
+          endDate,
         }
       : "skip",
   );
