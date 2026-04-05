@@ -21,6 +21,30 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_createdAt", ["createdAt"]),
 
+  grocery_stores: defineTable({
+    nameDisplay: v.string(),
+    nameNormalized: v.string(),
+    color: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_nameNormalized", ["nameNormalized"])
+    .index("by_nameDisplay", ["nameDisplay"]),
+
+  grocery_items: defineTable({
+    name: v.string(),
+    quantity: v.number(),
+    storeId: v.union(v.id("grocery_stores"), v.null()),
+    addedBy: v.union(v.literal("you"), v.literal("wife")),
+    completed: v.boolean(),
+    completedBy: v.union(v.literal("you"), v.literal("wife"), v.null()),
+    completedAt: v.union(v.number(), v.null()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_completed_createdAt", ["completed", "createdAt"])
+    .index("by_storeId", ["storeId"]),
+
   transaction_versions: defineTable({
     transactionId: v.id("transactions"),
     type: v.union(v.literal("income"), v.literal("expense")),
