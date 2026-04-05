@@ -23,7 +23,7 @@ export default function GroceryItemEditModal({
   onClose,
 }: GroceryItemEditModalProps) {
   const [name, setName] = useState(initialName);
-  const [quantity, setQuantity] = useState(initialQuantity);
+  const [quantity, setQuantity] = useState(String(initialQuantity));
   const [storeId, setStoreId] = useState<Id<"grocery_stores"> | "">(initialStoreId ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,10 +54,11 @@ export default function GroceryItemEditModal({
     setError(null);
     setIsSubmitting(true);
     try {
+      const qty = Math.max(1, parseInt(quantity) || 1);
       await editItem({
         itemId,
         name: trimmed,
-        quantity,
+        quantity: qty,
         storeId: storeId || null,
       });
       onClose();
@@ -126,7 +127,7 @@ export default function GroceryItemEditModal({
               type="number"
               min={1}
               value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+              onChange={(e) => setQuantity(e.target.value)}
               className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             />
           </div>
@@ -155,7 +156,7 @@ export default function GroceryItemEditModal({
 
           <button
             type="submit"
-            disabled={isSubmitting || name.trim().length === 0}
+            disabled={isSubmitting || name.trim().length === 0 || (parseInt(quantity) || 0) < 1}
             className="w-full rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {isSubmitting ? "Saving..." : "Save Changes"}
