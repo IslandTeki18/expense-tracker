@@ -80,6 +80,12 @@ export default function DashboardPage() {
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
           <div className="flex items-center gap-2">
             <Link
+              href="/grocery"
+              className="rounded bg-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+            >
+              Grocery List
+            </Link>
+            <Link
               href="/settings/categories"
               className="rounded bg-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
             >
