@@ -1,7 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-const personValidator = v.union(v.literal("you"), v.literal("wife"));
+const personValidator = v.union(v.literal("landon"), v.literal("emma"));
 
 function assertValidName(name: string): void {
   if (name.trim().length === 0) {

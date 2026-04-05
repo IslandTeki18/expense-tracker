@@ -11,16 +11,16 @@ interface GroceryItemRowProps {
     _id: Id<"grocery_items">;
     name: string;
     quantity: number;
-    addedBy: "you" | "wife";
+    addedBy: "landon" | "emma";
     completed: boolean;
-    completedBy: "you" | "wife" | null;
+    completedBy: "landon" | "emma" | null;
     store: {
       _id: Id<"grocery_stores">;
       nameDisplay: string;
       color: string;
     } | null;
   };
-  person: "you" | "wife";
+  person: "landon" | "emma";
   onEdit: () => void;
 }
 
@@ -88,8 +88,8 @@ export default function GroceryItemRow({ item, person, onEdit }: GroceryItemRowP
         </div>
         <p className="text-xs text-gray-400 dark:text-gray-500">
           {item.completed && item.completedBy
-            ? `Done by ${item.completedBy === "you" ? "You" : "Wife"}`
-            : `Added by ${item.addedBy === "you" ? "You" : "Wife"}`}
+            ? `Done by ${item.completedBy === "landon" ? "Landon" : "Emma"}`
+            : `Added by ${item.addedBy === "landon" ? "Landon" : "Emma"}`}
         </p>
       </div>
 

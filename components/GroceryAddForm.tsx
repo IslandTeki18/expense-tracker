@@ -13,7 +13,7 @@ export default function GroceryAddForm({ isUnlocked }: GroceryAddFormProps) {
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [storeId, setStoreId] = useState<Id<"grocery_stores"> | "">("");
-  const [addedBy, setAddedBy] = useState<"you" | "wife">("you");
+  const [addedBy, setAddedBy] = useState<"landon" | "emma">("landon");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -116,11 +116,11 @@ export default function GroceryAddForm({ isUnlocked }: GroceryAddFormProps) {
           <select
             id="itemAddedBy"
             value={addedBy}
-            onChange={(e) => setAddedBy(e.target.value as "you" | "wife")}
+            onChange={(e) => setAddedBy(e.target.value as "landon" | "emma")}
             className="w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
           >
-            <option value="you">You</option>
-            <option value="wife">Wife</option>
+            <option value="landon">Landon</option>
+            <option value="emma">Emma</option>
           </select>
         </div>
 

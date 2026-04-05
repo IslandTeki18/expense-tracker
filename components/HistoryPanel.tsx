@@ -9,8 +9,8 @@ interface VersionData {
   amountCents: number;
   entryDate: string | null;
   description: string | null;
-  spentBy: "you" | "wife" | null;
-  enteredBy: "you" | "wife";
+  spentBy: "landon" | "emma" | null;
+  enteredBy: "landon" | "emma";
   receiptFileId: Id<"_storage"> | null;
   createdAt: number;
   supersedesVersionId: Id<"transaction_versions"> | null;
@@ -21,8 +21,8 @@ interface HistoryPanelProps {
   activeVersionId: string;
 }
 
-function formatPersonLabel(person: "you" | "wife"): string {
-  return person === "you" ? "You" : "Wife";
+function formatPersonLabel(person: "landon" | "emma"): string {
+  return person === "landon" ? "Landon" : "Emma";
 }
 
 function formatTimestamp(ms: number): string {

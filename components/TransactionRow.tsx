@@ -9,7 +9,7 @@ export interface TransactionRowData {
   _id: Id<"transactions">;
   type: "income" | "expense";
   createdAt: number;
-  createdBy: "you" | "wife";
+  createdBy: "landon" | "emma";
   updatedAt: number;
   categoryId: Id<"categories"> | null;
   categoryName: string | null;
@@ -17,14 +17,14 @@ export interface TransactionRowData {
   amountCents: number;
   entryDate: string | null;
   description: string | null;
-  spentBy: "you" | "wife" | null;
-  enteredBy: "you" | "wife";
+  spentBy: "landon" | "emma" | null;
+  enteredBy: "landon" | "emma";
   receiptFileId: Id<"_storage"> | null;
   versionCreatedAt: number;
 }
 
-function formatPersonLabel(person: "you" | "wife"): string {
-  return person === "you" ? "You" : "Wife";
+function formatPersonLabel(person: "landon" | "emma"): string {
+  return person === "landon" ? "Landon" : "Emma";
 }
 
 function formatDateShort(dateStr: string): string {

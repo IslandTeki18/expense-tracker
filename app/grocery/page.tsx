@@ -75,7 +75,7 @@ export default function GroceryPage() {
           <GroceryList
             items={items}
             isUnlocked={isUnlocked}
-            person="you"
+            person="landon"
             storeFilter={storeFilter}
           />
         )}

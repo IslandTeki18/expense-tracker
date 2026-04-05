@@ -19,7 +19,7 @@ export type ValidationResult =
   | { valid: true; errors: Record<string, never> }
   | { valid: false; errors: Record<string, string> };
 
-const VALID_PERSONS: Person[] = ["you", "wife"];
+const VALID_PERSONS: Person[] = ["landon", "emma"];
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 function validateAmountCents(
@@ -51,7 +51,7 @@ function validatePerson(
     typeof value !== "string" ||
     !VALID_PERSONS.includes(value as Person)
   ) {
-    errors[field] = `${field} must be "you" or "wife".`;
+    errors[field] = `${field} must be "landon" or "emma".`;
   }
 }
 

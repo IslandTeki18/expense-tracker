@@ -41,7 +41,7 @@ convex/
 
 ### Enums
 
-- `Person`: `"you"` | `"wife"`
+- `Person`: `"landon"` | `"emma"`
 - `TxnType`: `"income"` | `"expense"`
 
 ### Table: `transactions`

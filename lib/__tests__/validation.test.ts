@@ -5,7 +5,7 @@ describe("validateIncome", () => {
   const validPayload = {
     amountCents: 500,
     entryDate: "2026-01-15",
-    enteredBy: "you",
+    enteredBy: "landon",
   };
 
   it("passes with valid payload", () => {
@@ -110,9 +110,9 @@ describe("validateExpense", () => {
   const validPayload = {
     amountCents: 500,
     entryDate: "2026-01-15",
-    enteredBy: "you",
+    enteredBy: "landon",
     description: "Groceries",
-    spentBy: "wife",
+    spentBy: "emma",
   };
 
   it("passes with valid payload", () => {

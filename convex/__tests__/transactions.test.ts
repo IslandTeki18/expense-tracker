@@ -11,14 +11,14 @@ describe("createIncome", () => {
     const txnId = await t.mutation(api.transactions.createIncome, {
       amountCents: 500000,
       entryDate: "2026-01-15",
-      enteredBy: "you",
+      enteredBy: "landon",
     });
 
     const txn = await t.run(async (ctx) => ctx.db.get(txnId));
     expect(txn).not.toBeNull();
     expect(txn!.type).toBe("income");
     expect(txn!.activeVersionId).not.toBeNull();
-    expect(txn!.createdBy).toBe("you");
+    expect(txn!.createdBy).toBe("landon");
 
     const version = await t.run(async (ctx) =>
       ctx.db.get(txn!.activeVersionId!),
@@ -26,7 +26,7 @@ describe("createIncome", () => {
     expect(version).not.toBeNull();
     expect(version!.amountCents).toBe(500000);
     expect(version!.entryDate).toBe("2026-01-15");
-    expect(version!.enteredBy).toBe("you");
+    expect(version!.enteredBy).toBe("landon");
     expect(version!.spentBy).toBeNull();
     expect(version!.receiptFileId).toBeNull();
     expect(version!.supersedesVersionId).toBeNull();
@@ -37,7 +37,7 @@ describe("createIncome", () => {
     const txnId = await t.mutation(api.transactions.createIncome, {
       amountCents: 100000,
       entryDate: "2026-02-01",
-      enteredBy: "wife",
+      enteredBy: "emma",
       description: "Paycheck",
     });
 
@@ -54,7 +54,7 @@ describe("createIncome", () => {
       t.mutation(api.transactions.createIncome, {
         amountCents: 0,
         entryDate: "2026-01-15",
-        enteredBy: "you",
+        enteredBy: "landon",
       }),
     ).rejects.toThrow("amountCents must be a positive integer");
 
@@ -62,7 +62,7 @@ describe("createIncome", () => {
       t.mutation(api.transactions.createIncome, {
         amountCents: -100,
         entryDate: "2026-01-15",
-        enteredBy: "you",
+        enteredBy: "landon",
       }),
     ).rejects.toThrow("amountCents must be a positive integer");
   });
@@ -73,7 +73,7 @@ describe("createIncome", () => {
       t.mutation(api.transactions.createIncome, {
         amountCents: 99.5,
         entryDate: "2026-01-15",
-        enteredBy: "you",
+        enteredBy: "landon",
       }),
     ).rejects.toThrow("amountCents must be a positive integer");
   });
@@ -84,7 +84,7 @@ describe("createIncome", () => {
       t.mutation(api.transactions.createIncome, {
         amountCents: 1000,
         entryDate: "01/15/2026",
-        enteredBy: "you",
+        enteredBy: "landon",
       }),
     ).rejects.toThrow("entryDate must be in YYYY-MM-DD format");
   });
@@ -97,8 +97,8 @@ describe("createExpense", () => {
       amountCents: 2500,
       entryDate: "2026-01-20",
       description: "Groceries",
-      spentBy: "wife",
-      enteredBy: "you",
+      spentBy: "emma",
+      enteredBy: "landon",
     });
 
     const txn = await t.run(async (ctx) => ctx.db.get(txnId));
@@ -111,8 +111,8 @@ describe("createExpense", () => {
     );
     expect(version!.amountCents).toBe(2500);
     expect(version!.description).toBe("Groceries");
-    expect(version!.spentBy).toBe("wife");
-    expect(version!.enteredBy).toBe("you");
+    expect(version!.spentBy).toBe("emma");
+    expect(version!.enteredBy).toBe("landon");
   });
 
   it("rejects empty description", async () => {
@@ -122,8 +122,8 @@ describe("createExpense", () => {
         amountCents: 1000,
         entryDate: "2026-01-20",
         description: "   ",
-        spentBy: "you",
-        enteredBy: "you",
+        spentBy: "landon",
+        enteredBy: "landon",
       }),
     ).rejects.toThrow("description must not be empty");
   });
@@ -135,8 +135,8 @@ describe("createExpense", () => {
         amountCents: 0,
         entryDate: "2026-01-20",
         description: "Test",
-        spentBy: "you",
-        enteredBy: "you",
+        spentBy: "landon",
+        enteredBy: "landon",
       }),
     ).rejects.toThrow("amountCents must be a positive integer");
   });
@@ -149,8 +149,8 @@ describe("editExpense", () => {
       amountCents: 2500,
       entryDate: "2026-01-20",
       description: "Groceries",
-      spentBy: "wife",
-      enteredBy: "you",
+      spentBy: "emma",
+      enteredBy: "landon",
     });
 
     const txnBefore = await t.run(async (ctx) => ctx.db.get(txnId));
@@ -161,8 +161,8 @@ describe("editExpense", () => {
       amountCents: 3000,
       entryDate: "2026-01-21",
       description: "Groceries (corrected)",
-      spentBy: "wife",
-      enteredBy: "you",
+      spentBy: "emma",
+      enteredBy: "landon",
     });
 
     const txnAfter = await t.run(async (ctx) => ctx.db.get(txnId));
@@ -190,7 +190,7 @@ describe("editExpense", () => {
         type: "expense",
         activeVersionId: null,
         createdAt: Date.now(),
-        createdBy: "you",
+        createdBy: "landon",
         updatedAt: Date.now(),
       });
       const versionId = await ctx.db.insert("transaction_versions", {
@@ -199,8 +199,8 @@ describe("editExpense", () => {
         amountCents: 1000,
         entryDate: "2026-01-20",
         description: "With receipt",
-        spentBy: "you",
-        enteredBy: "you",
+        spentBy: "landon",
+        enteredBy: "landon",
         receiptFileId: null,
         createdAt: Date.now(),
         supersedesVersionId: null,
@@ -215,8 +215,8 @@ describe("editExpense", () => {
       amountCents: 2000,
       entryDate: "2026-01-21",
       description: "Updated",
-      spentBy: "you",
-      enteredBy: "you",
+      spentBy: "landon",
+      enteredBy: "landon",
     });
 
     const txn = await t.run(async (ctx) =>
@@ -233,7 +233,7 @@ describe("editExpense", () => {
     const txnId = await t.mutation(api.transactions.createIncome, {
       amountCents: 5000,
       entryDate: "2026-01-15",
-      enteredBy: "you",
+      enteredBy: "landon",
     });
 
     await expect(
@@ -242,8 +242,8 @@ describe("editExpense", () => {
         amountCents: 3000,
         entryDate: "2026-01-21",
         description: "Wrong type",
-        spentBy: "you",
-        enteredBy: "you",
+        spentBy: "landon",
+        enteredBy: "landon",
       }),
     ).rejects.toThrow("Cannot edit income as expense");
   });
@@ -255,7 +255,7 @@ describe("editIncome", () => {
     const txnId = await t.mutation(api.transactions.createIncome, {
       amountCents: 100000,
       entryDate: "2026-01-01",
-      enteredBy: "you",
+      enteredBy: "landon",
     });
 
     const txnBefore = await t.run(async (ctx) => ctx.db.get(txnId));
@@ -265,7 +265,7 @@ describe("editIncome", () => {
       transactionId: txnId,
       amountCents: 120000,
       entryDate: "2026-01-02",
-      enteredBy: "you",
+      enteredBy: "landon",
     });
 
     const txnAfter = await t.run(async (ctx) => ctx.db.get(txnId));
@@ -286,8 +286,8 @@ describe("listTransactionHistory", () => {
       amountCents: 1000,
       entryDate: "2026-01-10",
       description: "v1",
-      spentBy: "you",
-      enteredBy: "you",
+      spentBy: "landon",
+      enteredBy: "landon",
     });
 
     await t.mutation(api.transactions.editExpense, {
@@ -295,8 +295,8 @@ describe("listTransactionHistory", () => {
       amountCents: 2000,
       entryDate: "2026-01-11",
       description: "v2",
-      spentBy: "you",
-      enteredBy: "you",
+      spentBy: "landon",
+      enteredBy: "landon",
     });
 
     await t.mutation(api.transactions.editExpense, {
@@ -304,8 +304,8 @@ describe("listTransactionHistory", () => {
       amountCents: 3000,
       entryDate: "2026-01-12",
       description: "v3",
-      spentBy: "you",
-      enteredBy: "you",
+      spentBy: "landon",
+      enteredBy: "landon",
     });
 
     const history = await t.query(api.transactions.listTransactionHistory, {
@@ -327,8 +327,8 @@ describe("deleteTransaction", () => {
       amountCents: 5000,
       entryDate: "2026-01-20",
       description: "To delete",
-      spentBy: "you",
-      enteredBy: "you",
+      spentBy: "landon",
+      enteredBy: "landon",
     });
 
     // Edit to create a second version
@@ -337,8 +337,8 @@ describe("deleteTransaction", () => {
       amountCents: 6000,
       entryDate: "2026-01-21",
       description: "Edited before delete",
-      spentBy: "you",
-      enteredBy: "you",
+      spentBy: "landon",
+      enteredBy: "landon",
     });
 
     await t.mutation(api.transactions.deleteTransaction, {
@@ -360,7 +360,7 @@ describe("deleteTransaction", () => {
     const txnId = await t.mutation(api.transactions.createIncome, {
       amountCents: 1000,
       entryDate: "2026-01-01",
-      enteredBy: "you",
+      enteredBy: "landon",
     });
     await t.mutation(api.transactions.deleteTransaction, {
       transactionId: txnId,
@@ -387,15 +387,15 @@ describe("getBalance", () => {
     await t.mutation(api.transactions.createIncome, {
       amountCents: 500000,
       entryDate: "2026-01-15",
-      enteredBy: "you",
+      enteredBy: "landon",
     });
 
     await t.mutation(api.transactions.createExpense, {
       amountCents: 12000,
       entryDate: "2026-01-16",
       description: "Groceries",
-      spentBy: "wife",
-      enteredBy: "you",
+      spentBy: "emma",
+      enteredBy: "landon",
     });
 
     const result = await t.query(api.transactions.getBalance, {});
@@ -408,7 +408,7 @@ describe("getBalance", () => {
     const incomeId = await t.mutation(api.transactions.createIncome, {
       amountCents: 100000,
       entryDate: "2026-01-01",
-      enteredBy: "you",
+      enteredBy: "landon",
     });
 
     // Edit income to a different amount
@@ -416,7 +416,7 @@ describe("getBalance", () => {
       transactionId: incomeId,
       amountCents: 150000,
       entryDate: "2026-01-01",
-      enteredBy: "you",
+      enteredBy: "landon",
     });
 
     const result = await t.query(api.transactions.getBalance, {});
@@ -430,15 +430,15 @@ describe("getBalance", () => {
     await t.mutation(api.transactions.createIncome, {
       amountCents: 100000,
       entryDate: "2026-01-01",
-      enteredBy: "you",
+      enteredBy: "landon",
     });
 
     const expenseId = await t.mutation(api.transactions.createExpense, {
       amountCents: 5000,
       entryDate: "2026-01-02",
       description: "To delete",
-      spentBy: "you",
-      enteredBy: "you",
+      spentBy: "landon",
+      enteredBy: "landon",
     });
 
     await t.mutation(api.transactions.deleteTransaction, {
@@ -457,15 +457,15 @@ describe("listTransactions", () => {
     await t.mutation(api.transactions.createIncome, {
       amountCents: 100000,
       entryDate: "2026-01-01",
-      enteredBy: "you",
+      enteredBy: "landon",
     });
 
     await t.mutation(api.transactions.createExpense, {
       amountCents: 5000,
       entryDate: "2026-01-02",
       description: "Lunch",
-      spentBy: "wife",
-      enteredBy: "you",
+      spentBy: "emma",
+      enteredBy: "landon",
     });
 
     const results = await t.query(api.transactions.listTransactions, {
@@ -483,15 +483,15 @@ describe("listTransactions", () => {
     await t.mutation(api.transactions.createIncome, {
       amountCents: 100000,
       entryDate: "2026-01-01",
-      enteredBy: "you",
+      enteredBy: "landon",
     });
 
     await t.mutation(api.transactions.createExpense, {
       amountCents: 5000,
       entryDate: "2026-01-02",
       description: "Lunch",
-      spentBy: "you",
-      enteredBy: "you",
+      spentBy: "landon",
+      enteredBy: "landon",
     });
 
     const results = await t.query(api.transactions.listTransactions, {
@@ -509,8 +509,8 @@ describe("getTransaction", () => {
       amountCents: 7500,
       entryDate: "2026-02-10",
       description: "Dinner",
-      spentBy: "you",
-      enteredBy: "wife",
+      spentBy: "landon",
+      enteredBy: "emma",
     });
 
     const result = await t.query(api.transactions.getTransaction, {
@@ -520,8 +520,8 @@ describe("getTransaction", () => {
     expect(result).not.toBeNull();
     expect(result!.amountCents).toBe(7500);
     expect(result!.description).toBe("Dinner");
-    expect(result!.spentBy).toBe("you");
-    expect(result!.enteredBy).toBe("wife");
+    expect(result!.spentBy).toBe("landon");
+    expect(result!.enteredBy).toBe("emma");
     expect(result!.type).toBe("expense");
   });
 
@@ -530,7 +530,7 @@ describe("getTransaction", () => {
     const txnId = await t.mutation(api.transactions.createIncome, {
       amountCents: 1000,
       entryDate: "2026-01-01",
-      enteredBy: "you",
+      enteredBy: "landon",
     });
     await t.mutation(api.transactions.deleteTransaction, {
       transactionId: txnId,

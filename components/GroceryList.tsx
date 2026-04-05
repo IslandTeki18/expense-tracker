@@ -13,9 +13,9 @@ interface GroceryItem {
   name: string;
   quantity: number;
   storeId: Id<"grocery_stores"> | null;
-  addedBy: "you" | "wife";
+  addedBy: "landon" | "emma";
   completed: boolean;
-  completedBy: "you" | "wife" | null;
+  completedBy: "landon" | "emma" | null;
   createdAt: number;
   store: {
     _id: Id<"grocery_stores">;
@@ -27,7 +27,7 @@ interface GroceryItem {
 interface GroceryListProps {
   items: GroceryItem[];
   isUnlocked: boolean;
-  person: "you" | "wife";
+  person: "landon" | "emma";
   storeFilter: StoreFilterValue;
 }
 

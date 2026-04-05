@@ -13,8 +13,8 @@ import TransactionFormModal from "@/components/TransactionFormModal";
 import ReceiptUploader from "@/components/ReceiptUploader";
 import CategoryBadge from "@/components/CategoryBadge";
 
-function formatPersonLabel(person: "you" | "wife"): string {
-  return person === "you" ? "You" : "Wife";
+function formatPersonLabel(person: "landon" | "emma"): string {
+  return person === "landon" ? "Landon" : "Emma";
 }
 
 function formatTimestamp(ms: number): string {

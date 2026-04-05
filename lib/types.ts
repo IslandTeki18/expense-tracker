@@ -1,2 +1,2 @@
-export type Person = "you" | "wife";
+export type Person = "landon" | "emma";
 export type TxnType = "income" | "expense";

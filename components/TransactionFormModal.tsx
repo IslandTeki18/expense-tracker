@@ -44,10 +44,10 @@ export default function TransactionFormModal({
     editData?.description ?? "",
   );
   const [enteredBy, setEnteredBy] = useState<Person>(() =>
-    editData?.enteredBy ?? "you",
+    editData?.enteredBy ?? "landon",
   );
   const [spentBy, setSpentBy] = useState<Person>(() =>
-    editData?.spentBy ?? "you",
+    editData?.spentBy ?? "landon",
   );
   const [receiptFileId, setReceiptFileId] = useState<Id<"_storage"> | null>(null);
   const [categoryId, setCategoryId] = useState<Id<"categories"> | null>(
@@ -299,8 +299,8 @@ export default function TransactionFormModal({
               onChange={(e) => setEnteredBy(e.target.value as Person)}
               className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
             >
-              <option value="you">You</option>
-              <option value="wife">Wife</option>
+              <option value="landon">Landon</option>
+              <option value="emma">Emma</option>
             </select>
             {fieldErrors.enteredBy && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -324,8 +324,8 @@ export default function TransactionFormModal({
                   onChange={(e) => setSpentBy(e.target.value as Person)}
                   className="w-full rounded border border-gray-300 px-4 py-2 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                 >
-                  <option value="you">You</option>
-                  <option value="wife">Wife</option>
+                  <option value="landon">Landon</option>
+                  <option value="emma">Emma</option>
                 </select>
                 {fieldErrors.spentBy && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400">
