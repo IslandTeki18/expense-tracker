@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, type QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 
 function assertPositiveCents(amount: number): void {
@@ -19,15 +19,30 @@ function assertNonEmpty(value: string, field: string): void {
   }
 }
 
+
+// ponytail: whole-table collects + in-memory join. Convex charges per db.get, and the
+// old one-get-per-row loop blew the per-query op limit at ~800 transactions.
+export async function loadLookups(ctx: QueryCtx) {
+  const [versions, categories] = await Promise.all([
+    ctx.db.query("transaction_versions").collect(),
+    ctx.db.query("categories").collect(),
+  ]);
+  return {
+    versionById: new Map(versions.map((v) => [v._id, v])),
+    categoryById: new Map(categories.map((c) => [c._id, c])),
+  };
+}
+
 export const getBalance = query({
   args: {},
   returns: v.object({ balanceCents: v.number() }),
   handler: async (ctx) => {
     const transactions = await ctx.db.query("transactions").collect();
+    const { versionById } = await loadLookups(ctx);
     let balanceCents = 0;
     for (const txn of transactions) {
       if (!txn.activeVersionId) continue;
-      const version = await ctx.db.get(txn.activeVersionId);
+      const version = versionById.get(txn.activeVersionId);
       if (!version) continue;
       if (txn.type === "income") {
         balanceCents += version.amountCents;
@@ -68,18 +83,19 @@ export const listTransactions = query({
       : "desc";
 
     const allTransactions = await ctx.db.query("transactions").collect();
+    const { versionById, categoryById } = await loadLookups(ctx);
 
     // Build enriched rows with version + category data
     const rows = [];
     for (const txn of allTransactions) {
       if (!txn.activeVersionId) continue;
-      const version = await ctx.db.get(txn.activeVersionId);
+      const version = versionById.get(txn.activeVersionId);
       if (!version) continue;
 
       let categoryName: string | null = null;
       let categoryColor: string | null = null;
       if (txn.categoryId) {
-        const cat = await ctx.db.get(txn.categoryId);
+        const cat = categoryById.get(txn.categoryId);
         if (cat) {
           categoryName = cat.nameDisplay;
           categoryColor = cat.color;

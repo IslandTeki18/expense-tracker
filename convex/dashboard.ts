@@ -1,5 +1,6 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
+import { loadLookups } from "./transactions";
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const SMALL_CATEGORY_THRESHOLD = 0.03; // 3% of total expenses
@@ -21,6 +22,7 @@ export const getDashboardAnalytics = query({
     }
 
     const allTransactions = await ctx.db.query("transactions").collect();
+    const { versionById, categoryById } = await loadLookups(ctx);
 
     // Build enriched rows filtered by date range
     let totalIncome = 0;
@@ -37,7 +39,7 @@ export const getDashboardAnalytics = query({
 
     for (const txn of allTransactions) {
       if (!txn.activeVersionId) continue;
-      const version = await ctx.db.get(txn.activeVersionId);
+      const version = versionById.get(txn.activeVersionId);
       if (!version) continue;
 
       // Exclude transactions with no date or outside range
@@ -64,7 +66,7 @@ export const getDashboardAnalytics = query({
         let catColor = "#9CA3AF";
 
         if (txn.categoryId) {
-          const cat = await ctx.db.get(txn.categoryId);
+          const cat = categoryById.get(txn.categoryId);
           if (cat) {
             catKey = txn.categoryId;
             catName = cat.nameDisplay;
