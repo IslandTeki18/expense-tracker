@@ -1,26 +1,15 @@
 "use client";
 
-export default function GlobalError({
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-950">
-        <div className="max-w-sm text-center">
-          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-            Something went wrong
-          </h1>
-          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            An unexpected error occurred. Please try again.
-          </p>
-          <button
-            onClick={reset}
-            className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            Try Again
+      <body className="dark" style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 16 }}>
+        <div>
+          <span className="eyebrow">ERROR</span>
+          <h1 className="m-title">Something went wrong_</h1>
+          <p style={{ color: "var(--fg-muted)", fontSize: 12 }}>An unexpected error occurred. Please try again.</p>
+          <button type="button" className="gt-btn gt-btn-primary" onClick={reset}>
+            TRY AGAIN
           </button>
         </div>
       </body>

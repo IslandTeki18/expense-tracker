@@ -33,24 +33,45 @@ export async function loadLookups(ctx: QueryCtx) {
   };
 }
 
+const SPARK_POINTS = 24;
+
 export const getBalance = query({
   args: {},
-  returns: v.object({ balanceCents: v.number() }),
+  returns: v.object({
+    balanceCents: v.number(),
+    totalIncome: v.number(),
+    totalExpenses: v.number(),
+    count: v.number(),
+    series: v.array(v.number()),
+  }),
   handler: async (ctx) => {
     const transactions = await ctx.db.query("transactions").collect();
     const { versionById } = await loadLookups(ctx);
-    let balanceCents = 0;
+    const events: { date: string; createdAt: number; delta: number }[] = [];
+    let totalIncome = 0;
+    let totalExpenses = 0;
     for (const txn of transactions) {
       if (!txn.activeVersionId) continue;
       const version = versionById.get(txn.activeVersionId);
       if (!version) continue;
-      if (txn.type === "income") {
-        balanceCents += version.amountCents;
-      } else {
-        balanceCents -= version.amountCents;
-      }
+      const signed = txn.type === "income" ? version.amountCents : -version.amountCents;
+      if (txn.type === "income") totalIncome += version.amountCents;
+      else totalExpenses += version.amountCents;
+      events.push({ date: version.entryDate ?? "", createdAt: txn.createdAt, delta: signed });
     }
-    return { balanceCents };
+    // Running balance ordered by entry date, sampled to SPARK_POINTS for the hero sparkline.
+    events.sort((a, b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt);
+    let run = 0;
+    const points = events.map((e) => (run += e.delta));
+    const step = Math.max(1, Math.floor(points.length / SPARK_POINTS));
+    const series = points.filter((_, i) => i % step === 0);
+    return {
+      balanceCents: totalIncome - totalExpenses,
+      totalIncome,
+      totalExpenses,
+      count: events.length,
+      series,
+    };
   },
 });
 
@@ -66,6 +87,9 @@ export const listTransactions = query({
     sortDirection: v.optional(v.string()),
     categoryFilter: v.optional(
       v.union(v.id("categories"), v.literal("uncategorized"), v.null()),
+    ),
+    typeFilter: v.optional(
+      v.union(v.literal("income"), v.literal("expense"), v.null()),
     ),
     startDate: v.optional(v.string()),
     endDate: v.optional(v.string()),
@@ -134,11 +158,16 @@ export const listTransactions = query({
       );
     }
 
+    // Filter by type
+    if (args.typeFilter) {
+      filtered = filtered.filter((r) => r.type === args.typeFilter);
+    }
+
     // Filter by category
     if (args.categoryFilter === "uncategorized") {
-      filtered = rows.filter((r) => r.type === "expense" && !r.categoryId);
+      filtered = filtered.filter((r) => r.type === "expense" && !r.categoryId);
     } else if (args.categoryFilter != null) {
-      filtered = rows.filter((r) => r.categoryId === args.categoryFilter);
+      filtered = filtered.filter((r) => r.categoryId === args.categoryFilter);
     }
 
     // Sort

@@ -1,209 +1,168 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  type FormEvent,
-  type KeyboardEvent,
-  type ClipboardEvent,
-} from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAction } from "convex/react";
 import { useRouter } from "next/navigation";
+import { Delete, Lock } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/components/AuthContext";
 
 const MAX_ATTEMPTS = 5;
 const COOLDOWN_MS = 30_000;
 const PIN_LENGTH = 4;
+const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
 export default function UnlockPage() {
   const { isUnlocked, isLoading, unlock } = useAuth();
   const router = useRouter();
   const verifyPasscode = useAction(api.passcode.verifyPasscode);
 
-  const [digits, setDigits] = useState<string[]>(Array(PIN_LENGTH).fill(""));
-  const [error, setError] = useState("");
+  const [pin, setPin] = useState("");
+  const [err, setErr] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [failCount, setFailCount] = useState(0);
   const [cooldownEnd, setCooldownEnd] = useState<number | null>(null);
-  const [cooldownRemaining, setCooldownRemaining] = useState(0);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [remaining, setRemaining] = useState(0);
 
-  const clearAndFocusFirst = useCallback(() => {
-    setDigits(Array(PIN_LENGTH).fill(""));
-    setTimeout(() => inputRefs.current[0]?.focus(), 0);
-  }, []);
+  const locked = cooldownEnd !== null;
+  const disabled = submitting || locked;
 
-  const submitPin = useCallback(
-    async (pin: string) => {
-      setError("");
+  const submit = useCallback(
+    async (code: string) => {
       setSubmitting(true);
+      setMessage(null);
       try {
-        const { success } = await verifyPasscode({ attempt: pin });
-
+        const { success } = await verifyPasscode({ attempt: code });
         if (success) {
           unlock();
           router.replace("/dashboard");
+          return;
+        }
+        const next = failCount + 1;
+        setFailCount(next);
+        setErr(true);
+        setTimeout(() => setErr(false), 450);
+        if (next >= MAX_ATTEMPTS) {
+          setCooldownEnd(Date.now() + COOLDOWN_MS);
         } else {
-          const next = failCount + 1;
-          setFailCount(next);
-
-          if (next >= MAX_ATTEMPTS) {
-            setCooldownEnd(Date.now() + COOLDOWN_MS);
-            setError("Too many attempts. Please wait.");
-          } else {
-            setError("Incorrect passcode.");
-          }
-          clearAndFocusFirst();
+          setMessage(`Wrong passcode · ${MAX_ATTEMPTS - next} attempt${MAX_ATTEMPTS - next === 1 ? "" : "s"} left`);
         }
       } catch {
-        setError("Something went wrong. Try again.");
-        clearAndFocusFirst();
+        setMessage("Something went wrong. Try again.");
       } finally {
+        setPin("");
         setSubmitting(false);
       }
     },
-    [verifyPasscode, unlock, router, failCount, clearAndFocusFirst],
+    [verifyPasscode, unlock, router, failCount],
+  );
+
+  const press = useCallback(
+    (d: string) => {
+      if (disabled || pin.length >= PIN_LENGTH) return;
+      const next = pin + d;
+      setPin(next);
+      if (next.length === PIN_LENGTH) setTimeout(() => submit(next), 140);
+    },
+    [disabled, pin, submit],
   );
 
   useEffect(() => {
-    if (!isLoading && isUnlocked) {
-      router.replace("/dashboard");
-    }
+    if (!isLoading && isUnlocked) router.replace("/dashboard");
   }, [isLoading, isUnlocked, router]);
 
   useEffect(() => {
     if (cooldownEnd === null) return;
-
     const tick = () => {
-      const remaining = cooldownEnd - Date.now();
-      if (remaining <= 0) {
+      const left = cooldownEnd - Date.now();
+      if (left <= 0) {
         setCooldownEnd(null);
-        setCooldownRemaining(0);
+        setRemaining(0);
         setFailCount(0);
-        setError("");
-        inputRefs.current[0]?.focus();
+        setMessage(null);
       } else {
-        setCooldownRemaining(Math.ceil(remaining / 1000));
+        setRemaining(Math.ceil(left / 1000));
       }
     };
-
     tick();
-    const id = setInterval(tick, 1000);
+    const id = setInterval(tick, 250);
     return () => clearInterval(id);
   }, [cooldownEnd]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key >= "0" && e.key <= "9") press(e.key);
+      else if (e.key === "Backspace") setPin((p) => p.slice(0, -1));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [press]);
+
   if (isLoading || isUnlocked) return null;
 
-  const isCoolingDown = cooldownEnd !== null;
-  const isDisabled = submitting || isCoolingDown;
-
-  function handleDigitChange(index: number, value: string) {
-    const char = value.slice(-1);
-    if (char && !/^\d$/.test(char)) return;
-
-    const next = [...digits];
-    next[index] = char;
-    setDigits(next);
-
-    if (char && index < PIN_LENGTH - 1) {
-      inputRefs.current[index + 1]?.focus();
-    }
-
-    if (char && next.every((d) => d !== "")) {
-      submitPin(next.join(""));
-    }
-  }
-
-  function handleKeyDown(index: number, e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Backspace" && digits[index] === "" && index > 0) {
-      e.preventDefault();
-      const next = [...digits];
-      next[index - 1] = "";
-      setDigits(next);
-      inputRefs.current[index - 1]?.focus();
-    }
-  }
-
-  function handlePaste(e: ClipboardEvent<HTMLInputElement>) {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "");
-    if (!pasted) return;
-
-    const next = [...digits];
-    for (let i = 0; i < PIN_LENGTH; i++) {
-      next[i] = pasted[i] ?? "";
-    }
-    setDigits(next);
-
-    const filledCount = next.filter((d) => d !== "").length;
-    if (filledCount < PIN_LENGTH) {
-      inputRefs.current[filledCount]?.focus();
-    } else {
-      inputRefs.current[PIN_LENGTH - 1]?.focus();
-      submitPin(next.join(""));
-    }
-  }
-
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    const pin = digits.join("");
-    if (pin.length < PIN_LENGTH) {
-      setError("Enter all 4 digits.");
-      return;
-    }
-    submitPin(pin);
-  }
-
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-gray-950">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-lg bg-white p-8 shadow-md dark:bg-gray-900"
-      >
-        <h1 className="mb-6 text-center text-xl font-semibold text-gray-900 dark:text-gray-100">
-          Enter Passcode
-        </h1>
-
-        <div className="mb-4 flex justify-center gap-3">
-          {digits.map((digit, i) => (
-            <input
-              key={i}
-              ref={(el) => {
-                inputRefs.current[i] = el;
-              }}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleDigitChange(i, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(i, e)}
-              onPaste={i === 0 ? handlePaste : undefined}
-              disabled={isDisabled}
-              autoFocus={i === 0}
-              autoComplete="off"
-              className="h-14 w-14 rounded-lg border-2 border-gray-300 text-center text-2xl font-bold text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:disabled:bg-gray-700"
-            />
-          ))}
+    <main className="m-page" style={{ display: "flex", flexDirection: "column", paddingBottom: 30 }}>
+      <div className="gt-brand" style={{ marginTop: 18 }}>
+        <div className="gt-brand-mark">
+          L&amp;E<span className="gt-brand-tick" />
         </div>
+        <div className="gt-brand-word">
+          SHARED<span style={{ color: "var(--accent)" }}>/</span>LEDGER
+        </div>
+      </div>
+      <div style={{ flex: 1 }} />
+      <span className="eyebrow">ENTER PASSCODE</span>
+      <h1 className="m-title" style={{ marginBottom: 4 }}>
+        Unlock_
+      </h1>
+      <p style={{ color: "var(--fg-muted)", fontSize: 12, margin: "0 0 18px" }}>
+        Locked until the 4-digit passcode is verified.
+      </p>
 
-        {error && (
-          <p className="mb-4 text-center text-sm text-red-600 dark:text-red-400">
-            {error}
-            {isCoolingDown && ` ${cooldownRemaining}s remaining.`}
-          </p>
-        )}
+      <div className={`gt-pin-dots ${err ? "gt-shake" : ""}`}>
+        {Array.from({ length: PIN_LENGTH }, (_, i) => (
+          <span key={i} className="gt-pin-dot" data-filled={i < pin.length ? "1" : "0"} data-err={err ? "1" : "0"} />
+        ))}
+      </div>
 
-        <button
-          type="submit"
-          disabled={isDisabled}
-          className="w-full rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-blue-400"
-        >
-          {submitting ? "Verifying..." : "Unlock"}
-        </button>
-      </form>
+      {locked ? (
+        <div className="gt-lockout">
+          <Lock size={20} />
+          <span className="eyebrow" style={{ color: "var(--danger)" }}>
+            TOO MANY ATTEMPTS
+          </span>
+          <b>{remaining}s</b>
+          <span>Cooldown active. Try again shortly.</span>
+        </div>
+      ) : (
+        <div className="gt-keypad">
+          {KEYS.map((k) => (
+            <button key={k} type="button" className="gt-key" disabled={disabled} onClick={() => press(k)}>
+              {k}
+            </button>
+          ))}
+          <button type="button" className="gt-key gt-key-fn" disabled={disabled} onClick={() => setPin("")}>
+            CLR
+          </button>
+          <button type="button" className="gt-key" disabled={disabled} onClick={() => press("0")}>
+            0
+          </button>
+          <button
+            type="button"
+            className="gt-key gt-key-fn"
+            disabled={disabled}
+            onClick={() => setPin((p) => p.slice(0, -1))}
+            aria-label="Backspace"
+          >
+            <Delete size={18} />
+          </button>
+        </div>
+      )}
+
+      <p className="gt-login-foot">
+        {submitting ? "Verifying…" : message ? <span style={{ color: "var(--danger)" }}>{message}</span> : " "}
+      </p>
     </main>
   );
 }

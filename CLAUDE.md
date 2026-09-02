@@ -11,8 +11,10 @@ No bank API. Manual entry only. Live "remaining working balance" computed from i
 - **Backend**: Convex (real-time database, file storage, server functions)
 - **Hosting**: Vercel
 - **Auth**: Passcode gate (no real auth system)
-- **Charts**: `chart.js` + `react-chartjs-2` (analytics dashboard)
-- **Theming**: `next-themes` (dark/light mode)
+- **Charts**: CSS-only bars / conic-gradient donut (no chart library)
+- **Icons**: `lucide-react`
+- **Theming**: `next-themes` (dark by default, light toggle in Settings)
+- **Design source**: Claude Design project "Expense Tracker" (mobile frames); tokens and `gt-*` / `m-*` kit classes are ported into `app/globals.css`. Font: Space Mono via `next/font`.
 - **Passcode hashing**: `bcryptjs`
 - **Testing**: Vitest + `convex-test`
 
@@ -34,65 +36,39 @@ Pinned versions: `next@16.1.6`, `react@19.2.3`, `convex@^1.32.0`, `tailwindcss@^
 ```
 app/
   page.tsx                       # Gate: redirect to /dashboard or /unlock
-  layout.tsx                     # Root layout: Convex, Auth, Theme providers
-  error.tsx                      # Route error boundary
-  global-error.tsx               # Root error boundary
-  not-found.tsx                  # 404
-  unlock/page.tsx                # Passcode entry (4-digit PIN, lockout)
-  dashboard/page.tsx             # Balance + transactions + analytics
-  transaction/[id]/page.tsx      # Detail + history + edit/delete + receipt
-  grocery/page.tsx               # Grocery list (store filter, FAB add)
-  grocery/stores/page.tsx        # Grocery store CRUD
-  settings/categories/page.tsx   # Category CRUD
+  layout.tsx                     # Root layout: font, Convex, Auth, Actor, Theme providers
+  globals.css                    # Tailwind + design tokens + ported kit classes
+  error.tsx / global-error.tsx / not-found.tsx
+  unlock/page.tsx                # PIN keypad (4-digit, 5 fails -> 30s lockout)
+  dashboard/page.tsx             # Home: balance hero + analytics + recent
+  transactions/page.tsx          # Ledger: chip filters, date/amount sort, month groups, FAB
+  transaction/[id]/page.tsx      # Detail: hero, details, receipt, version history, edit/delete
+  grocery/page.tsx               # Grocery list: store chips, completed section, FAB
+  settings/page.tsx              # Categories + Stores (segmented) + theme + lock
 components/
-  # Auth / Theme
+  AppShell.tsx                   # Passcode gate + bottom tab bar; exports AppBar
+  ui.tsx                         # Primitives: Segmented, Chip, Badge, PersonChip, PersonPick,
+                                 #   ActorSwitch, Field, Modal (bottom sheet), ConfirmDialog,
+                                 #   ColorPicker, Empty
   AuthContext.tsx                # { isUnlocked, isLoading, unlock, lock } via localStorage
+  ActorContext.tsx               # "Acting as" person (defaults enteredBy/spentBy/addedBy)
   ConvexClientProvider.tsx
   ThemeProvider.tsx
-  ThemeToggle.tsx
-  # Transactions
-  BalanceHeader.tsx
-  TransactionList.tsx            # Sort + filter + pagination
-  TransactionRow.tsx
-  TransactionFormModal.tsx       # Shared create/edit income+expense
-  TransactionSortHeader.tsx
-  HistoryPanel.tsx
-  ReceiptUploader.tsx
-  PaginationControl.tsx
+  BalanceHero.tsx                # Working balance + sparkline + totals
+  Analytics.tsx                  # 1M/3M/6M/ALL range, stats, monthly bars, donut, top categories
+  TxnRow.tsx                     # Transaction list row
+  TransactionFormModal.tsx       # Create/edit income + expense (type switch when creating)
+  ReceiptUploader.tsx            # Receipt slot: tap to upload / replace, image preview
+  GroceryItemModal.tsx           # Add/edit grocery item
+  EntityFormModal.tsx            # Create/edit/delete category or store
   QueryErrorBoundary.tsx
-  # Categories
-  CategoryList.tsx
-  CategoryForm.tsx
-  CategoryBadge.tsx
-  CategoryDeleteDialog.tsx
-  CategoryFilterControl.tsx
-  CategoryPieChart.tsx
-  TopCategoriesList.tsx
-  # Grocery
-  GroceryList.tsx
-  GroceryAddForm.tsx             # Deprecated inline form (replaced by modal)
-  GroceryAddItemModal.tsx
-  GroceryItemRow.tsx
-  GroceryItemEditModal.tsx
-  GroceryStoreList.tsx
-  GroceryStoreForm.tsx
-  GroceryStoreFilterControl.tsx
-  GroceryStoreBadge.tsx
-  GroceryStoreDeleteDialog.tsx
-  # Analytics
-  DashboardAnalytics.tsx
-  DashboardSummaryCards.tsx
-  MonthlyIncomeExpenseChart.tsx
-  DateRangePicker.tsx
 lib/
   types.ts              # Person, TxnType enums
   money.ts              # formatCents, parseMoneyToCents (cents <-> dollars)
   validation.ts         # validateIncome, validateExpense
   dates.ts              # validateDateRange, getMonthBuckets (analytics)
-  sorting.ts            # getCategorySortLabel (transaction sort key)
   categories.ts         # name/color validation + normalization helpers
-  charts.ts             # getCategoryChartColor
-  chartjs-setup.ts      # Chart.js plugin registration (Pie, Bar, Tooltip, Legend)
+  display.ts            # PEOPLE, fmtDate, fmtDateTime, monthLabel, todayISO, daysAgoISO
   __tests__/            # money.test.ts, validation.test.ts
 convex/
   schema.ts             # Tables (see Data Model)
@@ -104,6 +80,8 @@ convex/
   passcode.ts           # verifyPasscode action
   __tests__/            # transactions.test.ts
 ```
+
+Old routes `/settings/categories` and `/grocery/stores` redirect to `/settings` (see `next.config.ts`).
 
 ## Data Model
 
@@ -204,43 +182,43 @@ Indexes: `by_completed_createdAt`, `by_storeId`
 - Shared named-color entity: display name + normalized name + hex color.
 - Validation (`lib/categories.ts`): name 1-30 chars, 1-3 words; hex color format; duplicates rejected by normalized name.
 - Deleting a category **unlinks** it from all transactions (sets `categoryId` to null). It does not delete transactions.
-- Managed at `/settings/categories`. Surfaced in transaction rows (`CategoryBadge`), filtering (`CategoryFilterControl`), and analytics (`CategoryPieChart`, `TopCategoriesList`).
+- Managed at `/settings` (Categories tab, `EntityFormModal`). Surfaced in transaction rows (`TxnRow`), ledger chip filters, and `Analytics`.
 
 ## Grocery List
 
 - Two tables: `grocery_stores` (named-color entity, same rules as categories) and `grocery_items`.
 - Items have a name, integer quantity (>= 1), optional store, and completion state.
 - Completion tracks the actor and timestamp (`completedBy`, `completedAt`); toggling off clears them.
-- `/grocery`: list with store filter, completed section, FAB that opens `GroceryAddItemModal`, link to store management.
-- `/grocery/stores`: full store CRUD.
+- `/grocery`: list with store chips, completed section, FAB that opens `GroceryItemModal`.
+- Stores are managed at `/settings` (Grocery Stores tab, `EntityFormModal`).
 - Deleting a store **unlinks** it from all items (sets `storeId` to null).
 - `clearCompleted` bulk-deletes all completed items.
 
 ## Analytics
 
-- `getDashboardAnalytics({ startDate, endDate })` returns: `totalIncome`, `totalExpenses`, `transactionCount`, `pieChartData`, `monthlyBarChartData`, `topCategories`.
+- `getDashboardAnalytics({ startDate?, endDate })` returns: `totalIncome`, `totalExpenses`, `transactionCount`, `pieChartData`, `monthlyBarChartData`, `topCategories`. Omitting `startDate` means "all time" (starts at the earliest dated active version).
+- UI ranges: 1M / 3M / 6M / ALL (`Analytics.tsx`), persisted in localStorage.
 - Pie chart aggregates expenses by category; slices below a 3% threshold collapse into "Other".
 - Monthly bar chart includes every month in the range (`lib/dates.ts` `getMonthBuckets`), showing income vs. expense.
-- Rendered by `DashboardAnalytics` (summary cards, pie, monthly bar, top categories) with a `DateRangePicker`.
+- Rendered by `Analytics` (stat tiles, CSS monthly bars, conic-gradient donut, top categories).
 
 ## Passcode Gate
 
 - `PASSCODE_HASH` env var (bcrypt preferred) or `PASSCODE` env var
 - Convex action `verifyPasscode({ attempt })` compares server-side -> `{ success }`
 - On success: `localStorage.unlocked=true` via `AuthContext` (`useAuth()`)
-- UI: 4-digit PIN entry; 5 failed attempts triggers a 30s cooldown with live timer
+- UI: 4-digit PIN keypad (keyboard digits work too); 5 failed attempts triggers a 30s cooldown with live timer
 - App must not render any data until passcode verified
 - `app/page.tsx` redirects based on unlock state
-- Gated routes (`/dashboard`, `/grocery/*`, `/settings/*`) redirect to `/unlock` when locked
-- Convex queries pass `"skip"` until `isUnlocked` is true
+- Gated routes wrap their screen in `AppShell`, which redirects to `/unlock` when locked and only mounts children once unlocked, so screens can query Convex unconditionally
 
 ## API Surface (Convex Functions)
 
 ### transactions.ts
 
 Queries:
-- `getBalance()` -> `{ balanceCents }` (active versions only)
-- `listTransactions({ page?, pageSize?, sortField?, sortDirection?, categoryFilter?, startDate?, endDate? })` -> `{ transactions, totalCount, totalPages, page, pageSize }` (newest-first default, joined with active version; sort by date/amount/category; default 25/page)
+- `getBalance()` -> `{ balanceCents, totalIncome, totalExpenses, count, series }` (active versions only; `series` = running balance sampled to <=24 points for the sparkline)
+- `listTransactions({ page?, pageSize?, sortField?, sortDirection?, categoryFilter?, typeFilter?, startDate?, endDate? })` -> `{ transactions, totalCount, totalPages, page, pageSize }` (newest-first default, joined with active version; sort by date/amount/category; default 25/page)
 - `getTransaction(transactionId)` -> container + active version
 - `listTransactionHistory(transactionId)` -> all versions, newest first
 - `getReceiptUrl(storageId)` -> signed URL
@@ -316,44 +294,45 @@ Client validation mirrors server rules. Server rejects invalid payloads with cle
 
 ## UI Behavior
 
-### Dashboard
+Mobile-first: content column max 560px (760px on >=768px), fixed bottom tab bar (Home / Ledger / Grocery / Settings), FAB for primary add actions, forms open as bottom sheets (centered cards on >=640px).
 
-- `BalanceHeader`: current computed balance
-- `TransactionList`: mixed income/expense, newest-first by container `createdAt`
-- Row: type, amount, entryDate, description, spentBy (expense), enteredBy, category badge, receipt indicator
-- Sort controls (`TransactionSortHeader`): date / amount / category, asc/desc
-- Filters: category (`CategoryFilterControl`) and date range (`DateRangePicker`)
-- Pagination (`PaginationControl`)
-- `DashboardAnalytics` block
-- Theme toggle, lock button, links to grocery and category settings
-- Loading and error states required (`QueryErrorBoundary`)
+### Home (`/dashboard`)
+
+- `AppBar` with `ActorSwitch` (acting-as person, persisted in localStorage)
+- `BalanceHero`: working balance, sparkline, total in / out / entries
+- `Analytics` with 1M/3M/6M/ALL segmented range
+- Recent 4 transactions + "SEE ALL" link to `/transactions`
+- FAB opens `TransactionFormModal`
+
+### Ledger (`/transactions`)
+
+- Chips: All / Income / Expenses / each category / Uncategorized
+- Sort toggle (date <-> amount) in the app bar; date sort groups rows by entry month
+- 50 rows per page with a small pager; FAB to add
 
 ### Transaction Form Modal
 
-- Shared base with type-specific sections
-- Income: amount, date, description (optional), enteredBy
-- Expense: amount, date, description, spentBy, enteredBy, category, receipt upload
-- Client validation blocks submit until required fields provided
-- Submit wires to create/edit mutations
-- List updates via Convex reactivity
+- Bottom sheet; type segmented (expense/income) when creating, fixed when editing
+- Income: amount, date, description (optional), entered by
+- Expense: amount, date, description, spent by, entered by, category chips, receipt slot
+- Defaults spentBy/enteredBy to the current actor; client validation mirrors server
 
-### Transaction Detail Page (`/transaction/[id]`)
+### Transaction Detail (`/transaction/[id]`)
 
-- Active version data via `getTransaction`
-- History list via `listTransactionHistory`
-- Edit button opens prefilled modal
-- Receipt viewer/uploader/replace
-- Delete button with confirmation, routes back to dashboard
+- Hero (type pill, signed amount, description, date, version count)
+- Details card, receipt slot (tap to upload/replace, image preview + open link), version history timeline
+- Edit (pencil) opens prefilled modal; delete (trash) opens `ConfirmDialog`, routes back to `/transactions`
 
-### Grocery (`/grocery`, `/grocery/stores`)
+### Grocery (`/grocery`)
 
-- Item list with store filter, completed section, FAB add modal
-- Toggle completion (records actor + timestamp), edit modal, delete, clear completed
-- Store management page: list, create/edit form, delete dialog
+- Store chips (All / each store / No store), active list, completed section with CLEAR (confirm)
+- Check toggles completion as the current actor; tapping the item text opens the edit modal; trash deletes
+- FAB opens `GroceryItemModal`
 
-### Category Settings (`/settings/categories`)
+### Settings (`/settings`)
 
-- List, create/edit form (name + color), delete with confirmation dialog
+- Segmented Categories / Grocery Stores list; tapping a row opens `EntityFormModal` (edit + delete); "+ NEW" creates
+- Theme toggle (sun/moon) in the app bar; "Lock app" row
 
 ### Edit Flow
 
@@ -412,7 +391,7 @@ Client validation mirrors server rules. Server rejects invalid payloads with cle
 - Receipt replace deletes old file before attaching new
 - Deletion removes everything (container, all versions, all receipt files)
 - All money operations use integer cents end-to-end
-- Gate blocks all Convex queries until passcode verified (`"skip"` until unlocked)
+- Gate blocks all Convex queries until passcode verified (`AppShell` does not mount screens until unlocked)
 - Sorting defaults to container `createdAt`, not `entryDate`
 - Named-color entities (categories, grocery stores) dedup by normalized name
 - Deleting a category/store unlinks its foreign key (nulls it); it never cascades to transactions or items

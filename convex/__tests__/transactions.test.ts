@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { convexTest } from "convex-test";
 import { describe, expect, it } from "vitest";
 import { api } from "../_generated/api";
@@ -378,7 +379,7 @@ describe("getBalance", () => {
   it("returns 0 when no transactions", async () => {
     const t = convexTest(schema, modules);
     const result = await t.query(api.transactions.getBalance, {});
-    expect(result).toEqual({ balanceCents: 0 });
+    expect(result).toMatchObject({ balanceCents: 0 });
   });
 
   it("computes income - expense from active versions only", async () => {
@@ -399,7 +400,7 @@ describe("getBalance", () => {
     });
 
     const result = await t.query(api.transactions.getBalance, {});
-    expect(result).toEqual({ balanceCents: 500000 - 12000 });
+    expect(result).toMatchObject({ balanceCents: 500000 - 12000 });
   });
 
   it("uses active version amount after edit", async () => {
@@ -421,7 +422,7 @@ describe("getBalance", () => {
 
     const result = await t.query(api.transactions.getBalance, {});
     // Should reflect the edited (active) amount, not the original
-    expect(result).toEqual({ balanceCents: 150000 });
+    expect(result).toMatchObject({ balanceCents: 150000 });
   });
 
   it("excludes deleted transactions from balance", async () => {
@@ -446,7 +447,7 @@ describe("getBalance", () => {
     });
 
     const result = await t.query(api.transactions.getBalance, {});
-    expect(result).toEqual({ balanceCents: 100000 });
+    expect(result).toMatchObject({ balanceCents: 100000 });
   });
 });
 
@@ -468,8 +469,8 @@ describe("listTransactions", () => {
       enteredBy: "landon",
     });
 
-    const results = await t.query(api.transactions.listTransactions, {
-      limit: 10,
+    const { transactions: results } = await t.query(api.transactions.listTransactions, {
+      pageSize: 10,
     });
 
     expect(results).toHaveLength(2);
@@ -477,7 +478,7 @@ describe("listTransactions", () => {
     expect(results[1].type).toBe("income");
   });
 
-  it("respects limit parameter", async () => {
+  it("respects pageSize parameter", async () => {
     const t = convexTest(schema, modules);
 
     await t.mutation(api.transactions.createIncome, {
@@ -494,11 +495,12 @@ describe("listTransactions", () => {
       enteredBy: "landon",
     });
 
-    const results = await t.query(api.transactions.listTransactions, {
-      limit: 1,
+    const result = await t.query(api.transactions.listTransactions, {
+      pageSize: 1,
     });
 
-    expect(results).toHaveLength(1);
+    expect(result.transactions).toHaveLength(1);
+    expect(result.totalPages).toBe(2);
   });
 });
 

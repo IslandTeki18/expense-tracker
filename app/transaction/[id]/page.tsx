@@ -1,332 +1,238 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
+import { Paperclip, Pencil, SearchX, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useAuth } from "@/components/AuthContext";
 import { formatCents } from "@/lib/money";
-import HistoryPanel from "@/components/HistoryPanel";
+import { fmtDate, fmtDateTime, PEOPLE } from "@/lib/display";
+import AppShell, { AppBar } from "@/components/AppShell";
+import { Badge, ConfirmDialog, Empty, PersonChip } from "@/components/ui";
 import TransactionFormModal from "@/components/TransactionFormModal";
 import ReceiptUploader from "@/components/ReceiptUploader";
-import CategoryBadge from "@/components/CategoryBadge";
-
-function formatPersonLabel(person: "landon" | "emma"): string {
-  return person === "landon" ? "Landon" : "Emma";
-}
-
-function formatTimestamp(ms: number): string {
-  return new Date(ms).toLocaleString();
-}
+import QueryErrorBoundary from "@/components/QueryErrorBoundary";
 
 export default function TransactionDetailPage() {
-  const { isUnlocked, isLoading: authLoading } = useAuth();
+  return (
+    <AppShell>
+      <QueryErrorBoundary fallbackMessage="Failed to load transaction.">
+        <DetailScreen />
+      </QueryErrorBoundary>
+    </AppShell>
+  );
+}
+
+function DetailScreen() {
   const router = useRouter();
-  const params = useParams();
-  const transactionId = params.id as Id<"transactions">;
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const transactionId = useParams().id as Id<"transactions">;
+  const [showEdit, setShowEdit] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!authLoading && !isUnlocked) {
-      router.replace("/unlock");
-    }
-  }, [authLoading, isUnlocked, router]);
-
-  const transaction = useQuery(
-    api.transactions.getTransaction,
-    isUnlocked ? { transactionId } : "skip",
-  );
-  const history = useQuery(
-    api.transactions.listTransactionHistory,
-    isUnlocked ? { transactionId } : "skip",
-  );
-
-  const categories = useQuery(
-    api.categories.listCategories,
-    isUnlocked ? {} : "skip",
-  );
-
-  const receiptUrl = useQuery(
-    api.transactions.getReceiptUrl,
-    isUnlocked && transaction?.receiptFileId
-      ? { storageId: transaction.receiptFileId }
-      : "skip",
-  );
-
-  const replaceReceiptMutation = useMutation(api.transactions.replaceReceipt);
-  const deleteTransactionMutation = useMutation(api.transactions.deleteTransaction);
+  const txn = useQuery(api.transactions.getTransaction, { transactionId });
+  const history = useQuery(api.transactions.listTransactionHistory, { transactionId });
+  const categories = useQuery(api.categories.listCategories, {});
+  const receiptUrl = useQuery(api.transactions.getReceiptUrl, txn?.receiptFileId ? { storageId: txn.receiptFileId } : "skip");
+  const replaceReceipt = useMutation(api.transactions.replaceReceipt);
+  const deleteTransaction = useMutation(api.transactions.deleteTransaction);
 
   async function handleDelete() {
     setIsDeleting(true);
     setDeleteError(null);
     try {
-      await deleteTransactionMutation({ transactionId });
-      router.push("/dashboard");
+      await deleteTransaction({ transactionId });
+      router.push("/transactions");
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : "Failed to delete transaction");
       setIsDeleting(false);
     }
   }
 
-  if (authLoading || !isUnlocked) return null;
-
-  const isLoading = transaction === undefined || history === undefined;
-
-  if (isLoading) {
+  if (txn === undefined || history === undefined) {
     return (
-      <main className="min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-950">
-        <div className="mx-auto max-w-2xl space-y-6">
-          <Link
-            href="/dashboard"
-            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            &larr; Back to Dashboard
-          </Link>
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 w-48 rounded bg-gray-200 dark:bg-gray-700" />
-            <div className="h-40 rounded-lg bg-gray-200 dark:bg-gray-700" />
-            <div className="h-32 rounded-lg bg-gray-200 dark:bg-gray-700" />
-          </div>
-        </div>
-      </main>
+      <>
+        <AppBar sub="BACK" backHref="/transactions" title="Transaction" />
+        <div className="gt-skel" style={{ height: 170, marginBottom: 10 }} />
+        <div className="gt-skel" style={{ height: 160, marginBottom: 10 }} />
+      </>
     );
   }
 
-  if (transaction === null) {
+  if (txn === null) {
     return (
-      <main className="min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-950">
-        <div className="mx-auto max-w-2xl space-y-6">
-          <Link
-            href="/dashboard"
-            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            &larr; Back to Dashboard
-          </Link>
-          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center dark:border-gray-700 dark:bg-gray-900">
-            <p className="text-gray-500 dark:text-gray-400">Transaction not found.</p>
-          </div>
-        </div>
-      </main>
+      <>
+        <AppBar sub="BACK" backHref="/transactions" title="Not found" />
+        <Empty icon={<SearchX size={26} />}>Transaction not found. It may have been deleted.</Empty>
+      </>
     );
   }
 
-  const isIncome = transaction.type === "income";
+  const inc = txn.type === "income";
+  const cat = txn.categoryId ? categories?.find((c) => c._id === txn.categoryId) : undefined;
+  const sign = inc ? "+" : "−";
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-950">
-      <div className="mx-auto max-w-2xl space-y-6">
-        <Link
-          href="/dashboard"
-          className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-        >
-          &larr; Back to Dashboard
-        </Link>
-
-        <div className="flex items-center gap-3">
-          <span
-            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-              isIncome
-                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-            }`}
-          >
-            {isIncome ? "Income" : "Expense"}
-          </span>
-          <span
-            className={`text-2xl font-bold ${
-              isIncome ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"
-            }`}
-          >
-            {isIncome ? "+" : "-"}
-            {formatCents(transaction.amountCents)}
-          </span>
-          <div className="ml-auto flex gap-2">
-            <button
-              type="button"
-              onClick={() => setShowEditModal(true)}
-              className="rounded border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-            >
-              Edit
+    <>
+      <AppBar
+        sub="BACK"
+        backHref="/transactions"
+        title="Transaction"
+        right={
+          <div style={{ display: "flex", gap: 6 }}>
+            <button type="button" className="m-icon-btn" onClick={() => setShowEdit(true)} aria-label="Edit">
+              <Pencil size={15} />
             </button>
-            <button
-              type="button"
-              onClick={() => setShowDeleteConfirm(true)}
-              className="rounded border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
-            >
-              Delete
+            <button type="button" className="m-icon-btn" style={{ color: "var(--danger)" }} onClick={() => setConfirmDelete(true)} aria-label="Delete">
+              <Trash2 size={15} />
             </button>
           </div>
+        }
+      />
+
+      <div className="m-hero" style={{ marginBottom: 10 }}>
+        <span className={`gt-type-pill ${inc ? "gt-type-in" : "gt-type-out"}`}>{inc ? "INCOME" : "EXPENSE"}</span>
+        <div className="m-hero-val" style={{ fontSize: 38, color: inc ? "var(--highlight)" : "var(--fg)" }}>
+          {sign}
+          {formatCents(txn.amountCents)}
         </div>
-
-        {showDeleteConfirm && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-            <p className="text-sm text-red-800 dark:text-red-300">
-              Are you sure? This will permanently delete this transaction and all
-              its history.
-            </p>
-            {deleteError && (
-              <p className="mt-2 text-sm text-red-600 dark:text-red-400">{deleteError}</p>
-            )}
-            <div className="mt-3 flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowDeleteConfirm(false);
-                  setDeleteError(null);
-                }}
-                className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
-              >
-                {isDeleting ? "Deleting..." : "Delete"}
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
-          <dl className="divide-y divide-gray-100 dark:divide-gray-800">
-            <div className="flex justify-between px-4 py-3">
-              <dt className="text-sm text-gray-500 dark:text-gray-400">Entry Date</dt>
-              <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {transaction.entryDate ?? "--"}
-              </dd>
-            </div>
-
-            <div className="flex justify-between px-4 py-3">
-              <dt className="text-sm text-gray-500 dark:text-gray-400">Description</dt>
-              <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {transaction.description ?? "--"}
-              </dd>
-            </div>
-
-            {transaction.type === "expense" && (
-              <div className="flex justify-between px-4 py-3">
-                <dt className="text-sm text-gray-500 dark:text-gray-400">Spent By</dt>
-                <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {transaction.spentBy
-                    ? formatPersonLabel(transaction.spentBy)
-                    : "--"}
-                </dd>
-              </div>
-            )}
-
-            {transaction.type === "expense" && (
-              <div className="flex items-center justify-between px-4 py-3">
-                <dt className="text-sm text-gray-500 dark:text-gray-400">Category</dt>
-                <dd>
-                  <CategoryBadge
-                    txnType="expense"
-                    categoryName={
-                      transaction.categoryId && categories
-                        ? (categories.find((c) => c._id === transaction.categoryId)
-                            ?.nameDisplay ?? null)
-                        : null
-                    }
-                    categoryColor={
-                      transaction.categoryId && categories
-                        ? (categories.find((c) => c._id === transaction.categoryId)
-                            ?.color ?? null)
-                        : null
-                    }
-                  />
-                </dd>
-              </div>
-            )}
-
-            <div className="flex justify-between px-4 py-3">
-              <dt className="text-sm text-gray-500 dark:text-gray-400">Entered By</dt>
-              <dd className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                {formatPersonLabel(transaction.enteredBy)}
-              </dd>
-            </div>
-
-            {transaction.type === "expense" && (
-              <div className="px-4 py-3">
-                <div className="flex items-center justify-between">
-                  <dt className="text-sm text-gray-500 dark:text-gray-400">Receipt</dt>
-                  <dd className="text-sm font-medium">
-                    {transaction.receiptFileId && receiptUrl ? (
-                      <a
-                        href={receiptUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                      >
-                        View Receipt
-                      </a>
-                    ) : transaction.receiptFileId ? (
-                      <span className="text-gray-400 dark:text-gray-500">Loading...</span>
-                    ) : (
-                      <span className="text-gray-400 dark:text-gray-500">None</span>
-                    )}
-                  </dd>
-                </div>
-                <div className="mt-2">
-                  <ReceiptUploader
-                    onUploaded={async (storageId) => {
-                      await replaceReceiptMutation({
-                        transactionId: transaction._id,
-                        newReceiptFileId: storageId,
-                      });
-                    }}
-                    existingReceiptFileId={transaction.receiptFileId}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="flex justify-between px-4 py-3">
-              <dt className="text-sm text-gray-500 dark:text-gray-400">Created</dt>
-              <dd className="text-sm text-gray-700 dark:text-gray-300">
-                {formatTimestamp(transaction.createdAt)}
-              </dd>
-            </div>
-
-            <div className="flex justify-between px-4 py-3">
-              <dt className="text-sm text-gray-500 dark:text-gray-400">Last Updated</dt>
-              <dd className="text-sm text-gray-700 dark:text-gray-300">
-                {formatTimestamp(transaction.updatedAt)}
-              </dd>
-            </div>
-          </dl>
+        <div style={{ color: "var(--fg-muted)", fontSize: 13, marginTop: 8 }}>{txn.description || "No description"}</div>
+        <div className="m-hero-sub" style={{ marginTop: 10 }}>
+          {fmtDate(txn.entryDate)}
+          {history.length > 1 && ` · ${history.length} versions`}
         </div>
-
-        {history && (
-          <HistoryPanel
-            versions={history}
-            activeVersionId={transaction.activeVersionId}
-          />
-        )}
       </div>
 
-      {showEditModal && (
+      <div className="m-card">
+        <span className="eyebrow">DETAILS</span>
+        <div className="gt-kv">
+          {!inc && (
+            <div className="gt-kv-row">
+              <span className="k">Category</span>
+              <span className="v">{cat ? <Badge color={cat.color}>{cat.nameDisplay}</Badge> : "Uncategorized"}</span>
+            </div>
+          )}
+          {!inc && (
+            <div className="gt-kv-row">
+              <span className="k">Spent by</span>
+              <span className="v">
+                <PersonChip id={txn.spentBy} />
+              </span>
+            </div>
+          )}
+          <div className="gt-kv-row">
+            <span className="k">Entered by</span>
+            <span className="v">
+              <PersonChip id={txn.enteredBy} />
+            </span>
+          </div>
+          <div className="gt-kv-row">
+            <span className="k">Added</span>
+            <span className="v">{fmtDateTime(txn.createdAt)}</span>
+          </div>
+          <div className="gt-kv-row">
+            <span className="k">Updated</span>
+            <span className="v">{fmtDateTime(txn.updatedAt)}</span>
+          </div>
+        </div>
+      </div>
+
+      {!inc && (
+        <div className="m-card">
+          <span className="eyebrow">RECEIPT</span>
+          <div style={{ marginTop: 12 }}>
+            <ReceiptUploader
+              hasReceipt={!!txn.receiptFileId}
+              previewUrl={receiptUrl ?? null}
+              onUploaded={async (storageId) => {
+                await replaceReceipt({ transactionId, newReceiptFileId: storageId });
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="m-card">
+        <span className="eyebrow">VERSION HISTORY</span>
+        <div className="gt-hist">
+          {history.map((ver, i) => {
+            const active = ver._id === txn.activeVersionId;
+            return (
+              <div className="gt-hist-item" key={ver._id}>
+                <div className="gt-hist-rail">
+                  <span className="gt-hist-node" data-active={active ? "1" : "0"} />
+                  {i < history.length - 1 && <span className="gt-hist-line" />}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                    <b className="gt-amt" style={{ color: inc ? "var(--highlight)" : "var(--fg)" }}>
+                      {sign}
+                      {formatCents(ver.amountCents)}
+                    </b>
+                    {active ? (
+                      <span className="gt-badge gt-badge-live" style={{ fontSize: 9 }}>
+                        <span className="gt-dot" />
+                        ACTIVE
+                      </span>
+                    ) : (
+                      <span className="gt-badge" style={{ fontSize: 9 }}>
+                        SUPERSEDED
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--fg-muted)", marginTop: 3 }}>
+                    {ver.description || "No description"} · {fmtDate(ver.entryDate)}
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--fg-subtle)", marginTop: 4, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                    <span>{fmtDateTime(ver.createdAt)}</span>
+                    <span>· by {PEOPLE[ver.enteredBy].name}</span>
+                    {ver.receiptFileId && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+                        · <Paperclip size={10} /> receipt
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {showEdit && (
         <TransactionFormModal
-          mode={transaction.type}
-          onClose={() => setShowEditModal(false)}
+          mode={txn.type}
+          onClose={() => setShowEdit(false)}
           editData={{
-            transactionId: transaction._id,
-            amountCents: transaction.amountCents,
-            entryDate: transaction.entryDate ?? "",
-            description: transaction.description,
-            spentBy: transaction.spentBy,
-            enteredBy: transaction.enteredBy,
-            receiptFileId: transaction.receiptFileId,
-            categoryId: transaction.categoryId,
+            transactionId: txn._id,
+            amountCents: txn.amountCents,
+            entryDate: txn.entryDate ?? "",
+            description: txn.description,
+            spentBy: txn.spentBy,
+            enteredBy: txn.enteredBy,
+            receiptFileId: txn.receiptFileId,
+            categoryId: txn.categoryId,
           }}
         />
       )}
-    </main>
+
+      {confirmDelete && (
+        <ConfirmDialog
+          onClose={() => {
+            if (!isDeleting) {
+              setConfirmDelete(false);
+              setDeleteError(null);
+            }
+          }}
+          onConfirm={handleDelete}
+          busy={isDeleting}
+          error={deleteError}
+          title="Delete this transaction?"
+          body="Removes the transaction, all versions and receipts. Balance recomputes. Cannot be undone."
+        />
+      )}
+    </>
   );
 }

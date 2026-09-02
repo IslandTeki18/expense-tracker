@@ -1,103 +1,165 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useQuery } from "convex/react";
-import Link from "next/link";
-import { useAuth } from "@/components/AuthContext";
+import { useState } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { Check, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
-import GroceryAddItemModal from "@/components/GroceryAddItemModal";
-import GroceryList from "@/components/GroceryList";
-import GroceryStoreFilterControl, {
-  StoreFilterValue,
-} from "@/components/GroceryStoreFilterControl";
+import { Id } from "@/convex/_generated/dataModel";
+import { PEOPLE } from "@/lib/display";
+import AppShell, { AppBar } from "@/components/AppShell";
+import { useActor } from "@/components/ActorContext";
+import { ActorSwitch, Chip, ConfirmDialog, Empty } from "@/components/ui";
+import GroceryItemModal from "@/components/GroceryItemModal";
+import QueryErrorBoundary from "@/components/QueryErrorBoundary";
+
+type Filter = null | "no-store" | Id<"grocery_stores">;
+
+interface Item {
+  _id: Id<"grocery_items">;
+  name: string;
+  quantity: number;
+  storeId: Id<"grocery_stores"> | null;
+  addedBy: "landon" | "emma";
+  completed: boolean;
+  completedBy: "landon" | "emma" | null;
+  completedAt: number | null;
+  createdAt: number;
+  store: { nameDisplay: string; color: string } | null;
+}
 
 export default function GroceryPage() {
-  const { isUnlocked, isLoading } = useAuth();
-  const router = useRouter();
-  const [storeFilter, setStoreFilter] = useState<StoreFilterValue>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-
-  useEffect(() => {
-    if (!isLoading && !isUnlocked) {
-      router.replace("/unlock");
-    }
-  }, [isLoading, isUnlocked, router]);
-
-  const items = useQuery(
-    api.grocery.listItems,
-    isUnlocked ? {} : "skip",
-  );
-
-  if (isLoading || !isUnlocked) return null;
-
   return (
-    <main className="min-h-screen bg-gray-50 p-4 sm:p-8 dark:bg-gray-950">
-      <div className="mx-auto max-w-4xl space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              &larr; Dashboard
-            </Link>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              Grocery List
-            </h1>
-          </div>
-          <Link
-            href="/grocery/stores"
-            className="rounded bg-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-          >
-            Stores
-          </Link>
-        </div>
+    <AppShell>
+      <QueryErrorBoundary fallbackMessage="Failed to load the grocery list.">
+        <GroceryScreen />
+      </QueryErrorBoundary>
+    </AppShell>
+  );
+}
 
-        <GroceryStoreFilterControl
-          isUnlocked={isUnlocked}
-          value={storeFilter}
-          onChange={setStoreFilter}
-        />
+function GroceryScreen() {
+  const { actor, setActor } = useActor();
+  const [filter, setFilter] = useState<Filter>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [editTarget, setEditTarget] = useState<Item | null>(null);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
-        {items === undefined ? (
-          <div className="rounded-lg bg-white shadow-sm dark:bg-gray-900">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="border-b border-gray-100 px-4 py-3 last:border-b-0 dark:border-gray-800"
-              >
-                <div className="h-5 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <GroceryList
-            items={items}
-            isUnlocked={isUnlocked}
-            person="landon"
-            storeFilter={storeFilter}
-          />
-        )}
-      </div>
+  const items = useQuery(api.grocery.listItems, {});
+  const stores = useQuery(api.groceryStores.listStores, {});
+  const toggleItem = useMutation(api.grocery.toggleItem);
+  const deleteItem = useMutation(api.grocery.deleteItem);
+  const clearCompleted = useMutation(api.grocery.clearCompleted);
 
+  const visible = (items ?? []).filter((i) => (filter === null ? true : filter === "no-store" ? i.storeId === null : i.storeId === filter));
+  const active = visible.filter((i) => !i.completed).sort((a, b) => a.createdAt - b.createdAt);
+  const done = visible.filter((i) => i.completed).sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
+
+  async function handleClear() {
+    setIsClearing(true);
+    try {
+      await clearCompleted({});
+      setConfirmClear(false);
+    } finally {
+      setIsClearing(false);
+    }
+  }
+
+  const row = (i: Item) => (
+    <div key={i._id} className="gt-gitem" data-done={i.completed ? "1" : "0"}>
       <button
         type="button"
-        onClick={() => setShowAddModal(true)}
-        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 active:scale-95"
-        aria-label="Add item"
+        className="gt-check"
+        data-on={i.completed ? "1" : "0"}
+        onClick={() => toggleItem({ itemId: i._id, completedBy: actor })}
+        aria-label={i.completed ? "Mark not done" : "Mark done"}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
+        <Check size={14} />
+      </button>
+      <button type="button" onClick={() => setEditTarget(i)} style={{ minWidth: 0, flex: 1, background: "none", border: 0, padding: 0, textAlign: "left", color: "inherit" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span className="gt-gname" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {i.name}
+          </span>
+          {i.quantity > 1 && <span className="gt-qty">×{i.quantity}</span>}
+        </div>
+        <div className="gt-gmeta">
+          {i.store && <span style={{ color: i.store.color }}>{i.store.nameDisplay}</span>}
+          <span>{i.completed && i.completedBy ? `done by ${PEOPLE[i.completedBy].name}` : `added by ${PEOPLE[i.addedBy].name}`}</span>
+        </div>
+      </button>
+      <button type="button" className="m-icon-btn" style={{ width: 32, height: 32, border: 0 }} onClick={() => deleteItem({ itemId: i._id })} aria-label="Delete">
+        <Trash2 size={14} />
+      </button>
+    </div>
+  );
+
+  return (
+    <>
+      <AppBar sub={items ? `${active.length} TO BUY · ${done.length} DONE` : "GROCERY"} title="Grocery" right={<ActorSwitch value={actor} onChange={setActor} />} />
+
+      <div className="m-chips-scroll">
+        <Chip active={filter === null} onClick={() => setFilter(null)}>
+          All stores
+        </Chip>
+        {stores?.map((s) => (
+          <Chip key={s._id} active={filter === s._id} color={s.color} onClick={() => setFilter(s._id)}>
+            {s.nameDisplay}
+          </Chip>
+        ))}
+        <Chip active={filter === "no-store"} color="var(--fg-subtle)" onClick={() => setFilter("no-store")}>
+          No store
+        </Chip>
+      </div>
+
+      {items === undefined ? (
+        <div className="gt-skel" style={{ height: 220, marginTop: 14 }} />
+      ) : (
+        <>
+          <div className="m-card" style={{ padding: "2px 14px", marginTop: 14 }}>
+            {active.map(row)}
+            {!active.length && (
+              <Empty icon={<ShoppingCart size={22} />}>{filter ? "Nothing to buy at this store." : "The list is clear. Add something with +"}</Empty>
+            )}
+          </div>
+          {done.length > 0 && (
+            <>
+              <div className="gt-section-rule">
+                <span className="eyebrow">COMPLETED · {done.length}</span>
+                <span className="line" />
+                <button type="button" className="gt-back" style={{ color: "var(--danger)" }} onClick={() => setConfirmClear(true)}>
+                  CLEAR
+                </button>
+              </div>
+              <div className="m-card" style={{ padding: "2px 14px" }}>
+                {done.map(row)}
+              </div>
+            </>
+          )}
+        </>
+      )}
+
+      <button type="button" className="gt-fab" onClick={() => setShowAdd(true)} aria-label="Add item">
+        <Plus size={24} />
       </button>
 
-      {showAddModal && (
-        <GroceryAddItemModal
-          isUnlocked={isUnlocked}
-          onClose={() => setShowAddModal(false)}
+      {showAdd && <GroceryItemModal onClose={() => setShowAdd(false)} />}
+      {editTarget && (
+        <GroceryItemModal
+          onClose={() => setEditTarget(null)}
+          editData={{ itemId: editTarget._id, name: editTarget.name, quantity: editTarget.quantity, storeId: editTarget.storeId }}
         />
       )}
-    </main>
+      {confirmClear && (
+        <ConfirmDialog
+          onClose={() => setConfirmClear(false)}
+          onConfirm={handleClear}
+          busy={isClearing}
+          confirmLabel="CLEAR"
+          title="Clear completed items?"
+          body={`This permanently deletes all ${(items ?? []).filter((i) => i.completed).length} completed items from the list.`}
+        />
+      )}
+    </>
   );
 }

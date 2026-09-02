@@ -1,85 +1,95 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { useMutation } from "convex/react";
+import { ImagePlus, Paperclip } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 
 interface ReceiptUploaderProps {
-  onUploaded: (storageId: Id<"_storage">) => void;
-  existingReceiptFileId?: Id<"_storage"> | null;
+  onUploaded: (storageId: Id<"_storage">) => void | Promise<void>;
+  /** Whether a receipt is already attached (shows the "has receipt" slot). */
+  hasReceipt: boolean;
+  /** Signed URL of the current receipt; renders a preview when it is an image. */
+  previewUrl?: string | null;
   disabled?: boolean;
 }
 
-export default function ReceiptUploader({
-  onUploaded,
-  existingReceiptFileId,
-  disabled,
-}: ReceiptUploaderProps) {
+/** Receipt slot: tap to pick a file, uploads straight to Convex storage. */
+export default function ReceiptUploader({ onUploaded, hasReceipt, previewUrl, disabled }: ReceiptUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [uploaded, setUploaded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const generateUploadUrl = useMutation(api.transactions.generateUploadUrl);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setError(null);
     setIsUploading(true);
-
     try {
       const uploadUrl = await generateUploadUrl();
-
       const result = await fetch(uploadUrl, {
         method: "POST",
         headers: { "Content-Type": file.type },
         body: file,
       });
-
-      if (!result.ok) {
-        throw new Error("Upload failed");
-      }
-
+      if (!result.ok) throw new Error("Upload failed");
       const { storageId } = await result.json();
-      setUploaded(true);
-      onUploaded(storageId as Id<"_storage">);
+      await onUploaded(storageId as Id<"_storage">);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 
-  const hasReceipt = existingReceiptFileId || uploaded;
-
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-        Receipt
-      </label>
-      {hasReceipt && !isUploading && (
-        <p className="mb-1 text-sm text-green-600">
-          {uploaded ? "New receipt attached" : "Receipt attached"}
-        </p>
-      )}
+      <button
+        type="button"
+        className="gt-receipt"
+        data-has={hasReceipt ? "1" : "0"}
+        disabled={disabled || isUploading}
+        onClick={() => fileInputRef.current?.click()}
+      >
+        {hasReceipt ? (
+          <>
+            {previewUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={previewUrl} alt="Receipt" className="gt-receipt-img" />
+            ) : (
+              <div className="gt-receipt-lines">
+                {[92, 60, 78, 45, 70, 88, 52, 66].map((w, i) => (
+                  <span key={i} style={{ width: `${w}%` }} />
+                ))}
+              </div>
+            )}
+            <span className="gt-receipt-tag">
+              <Paperclip size={12} /> {isUploading ? "UPLOADING" : "REPLACE"}
+            </span>
+          </>
+        ) : (
+          <div className="gt-receipt-empty">
+            <ImagePlus size={18} />
+            <span>{isUploading ? "Uploading…" : "Add receipt"}</span>
+          </div>
+        )}
+      </button>
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*,application/pdf"
         onChange={handleFileChange}
-        disabled={disabled || isUploading}
-        className="block w-full text-sm text-gray-500 file:mr-3 file:rounded file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200 disabled:opacity-50 dark:text-gray-400 dark:file:bg-gray-700 dark:file:text-gray-300 dark:hover:file:bg-gray-600"
+        hidden
       />
-      {isUploading && (
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Uploading...</p>
+      {previewUrl && (
+        <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="gt-field-hint" style={{ color: "var(--accent)" }}>
+          Open full size
+        </a>
       )}
-      {error && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <span className="gt-field-err">{error}</span>}
     </div>
   );
 }

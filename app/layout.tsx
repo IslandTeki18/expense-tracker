@@ -1,23 +1,27 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Space_Mono } from "next/font/google";
 import "./globals.css";
 import ConvexClientProvider from "@/components/ConvexClientProvider";
 import { AuthProvider } from "@/components/AuthContext";
+import { ActorProvider } from "@/components/ActorContext";
 import ThemeProvider from "@/components/ThemeProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const spaceMono = Space_Mono({
+  variable: "--font-space-mono",
+  weight: ["400", "700"],
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Shared Expenses Tracker",
+  title: "Shared Ledger",
   description: "Track shared income and expenses for one bank account",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0a0a0a",
 };
 
 export default function RootLayout({
@@ -26,11 +30,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="en" className={spaceMono.variable} suppressHydrationWarning>
+      <body>
         <ThemeProvider>
           <ConvexClientProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <ActorProvider>{children}</ActorProvider>
+            </AuthProvider>
           </ConvexClientProvider>
         </ThemeProvider>
       </body>

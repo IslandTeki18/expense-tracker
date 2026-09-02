@@ -7,22 +7,33 @@ const SMALL_CATEGORY_THRESHOLD = 0.03; // 3% of total expenses
 
 export const getDashboardAnalytics = query({
   args: {
-    startDate: v.string(),
+    startDate: v.optional(v.string()),
     endDate: v.string(),
   },
-  handler: async (ctx, { startDate, endDate }) => {
-    if (!DATE_REGEX.test(startDate)) {
+  handler: async (ctx, args) => {
+    const endDate = args.endDate;
+    if (args.startDate !== undefined && !DATE_REGEX.test(args.startDate)) {
       throw new Error("startDate must be YYYY-MM-DD.");
     }
     if (!DATE_REGEX.test(endDate)) {
       throw new Error("endDate must be YYYY-MM-DD.");
     }
-    if (startDate > endDate) {
-      throw new Error("startDate must be before or equal to endDate.");
-    }
 
     const allTransactions = await ctx.db.query("transactions").collect();
     const { versionById, categoryById } = await loadLookups(ctx);
+
+    // No startDate = "all time": start at the earliest dated active version.
+    let startDate = args.startDate;
+    if (startDate === undefined) {
+      startDate = endDate;
+      for (const txn of allTransactions) {
+        const version = txn.activeVersionId ? versionById.get(txn.activeVersionId) : undefined;
+        if (version?.entryDate && version.entryDate < startDate) startDate = version.entryDate;
+      }
+    }
+    if (startDate > endDate) {
+      throw new Error("startDate must be before or equal to endDate.");
+    }
 
     // Build enriched rows filtered by date range
     let totalIncome = 0;
