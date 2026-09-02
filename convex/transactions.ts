@@ -75,36 +75,26 @@ export const getBalance = query({
   },
 });
 
-const VALID_SORT_FIELDS = ["date", "amount", "category"] as const;
-const VALID_SORT_DIRECTIONS = ["asc", "desc"] as const;
 const DEFAULT_PAGE_SIZE = 25;
 
 export const listTransactions = query({
   args: {
     page: v.optional(v.number()),
     pageSize: v.optional(v.number()),
-    sortField: v.optional(v.string()),
-    sortDirection: v.optional(v.string()),
+    sortField: v.optional(v.union(v.literal("date"), v.literal("amount"))),
     categoryFilter: v.optional(
       v.union(v.id("categories"), v.literal("uncategorized"), v.null()),
     ),
     typeFilter: v.optional(
       v.union(v.literal("income"), v.literal("expense"), v.null()),
     ),
-    startDate: v.optional(v.string()),
-    endDate: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const page = args.page && args.page >= 1 ? Math.floor(args.page) : 1;
     const pageSize = args.pageSize && args.pageSize >= 1
       ? Math.floor(args.pageSize)
       : DEFAULT_PAGE_SIZE;
-    const sortField = (VALID_SORT_FIELDS as readonly string[]).includes(args.sortField ?? "")
-      ? (args.sortField as (typeof VALID_SORT_FIELDS)[number])
-      : "date";
-    const sortDirection = (VALID_SORT_DIRECTIONS as readonly string[]).includes(args.sortDirection ?? "")
-      ? (args.sortDirection as (typeof VALID_SORT_DIRECTIONS)[number])
-      : "desc";
+    const sortField = args.sortField ?? "date";
 
     const allTransactions = await ctx.db.query("transactions").collect();
     const { versionById, categoryById } = await loadLookups(ctx);
@@ -147,16 +137,6 @@ export const listTransactions = query({
 
     // Filter by date range
     let filtered = rows;
-    if (args.startDate) {
-      filtered = filtered.filter(
-        (r) => r.entryDate != null && r.entryDate >= args.startDate!,
-      );
-    }
-    if (args.endDate) {
-      filtered = filtered.filter(
-        (r) => r.entryDate != null && r.entryDate <= args.endDate!,
-      );
-    }
 
     // Filter by type
     if (args.typeFilter) {
@@ -170,20 +150,13 @@ export const listTransactions = query({
       filtered = filtered.filter((r) => r.categoryId === args.categoryFilter);
     }
 
-    // Sort
-    const dir = sortDirection === "asc" ? 1 : -1;
+    // Sort desc by field, newest-created first on ties
     filtered.sort((a, b) => {
-      let cmp = 0;
-      if (sortField === "date") {
-        cmp = (a.entryDate ?? "").localeCompare(b.entryDate ?? "");
-      } else if (sortField === "amount") {
-        cmp = a.amountCents - b.amountCents;
-      } else if (sortField === "category") {
-        const labelA = getCatSortLabel(a.type, a.categoryName);
-        const labelB = getCatSortLabel(b.type, b.categoryName);
-        cmp = labelA.localeCompare(labelB);
-      }
-      return cmp === 0 ? b.createdAt - a.createdAt : cmp * dir;
+      const cmp =
+        sortField === "date"
+          ? (b.entryDate ?? "").localeCompare(a.entryDate ?? "")
+          : b.amountCents - a.amountCents;
+      return cmp || b.createdAt - a.createdAt;
     });
 
     // Paginate
@@ -201,15 +174,6 @@ export const listTransactions = query({
     };
   },
 });
-
-function getCatSortLabel(
-  txnType: string,
-  categoryName: string | null,
-): string {
-  if (txnType === "income") return "\uffff_INCOME";
-  if (!categoryName) return "\uffff_UNCATEGORIZED";
-  return categoryName.toLowerCase();
-}
 
 export const getTransaction = query({
   args: { transactionId: v.id("transactions") },

@@ -45,7 +45,6 @@ function LedgerScreen() {
     page,
     pageSize: PAGE_SIZE,
     sortField: sort,
-    sortDirection: "desc",
     typeFilter,
     categoryFilter,
   });

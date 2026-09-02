@@ -7,7 +7,7 @@ No bank API. Manual entry only. Live "remaining working balance" computed from i
 
 ## Stack
 
-- **Frontend**: Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS v4
+- **Frontend**: Next.js 16 (App Router) + React 19 + TypeScript + hand-written CSS (no Tailwind)
 - **Backend**: Convex (real-time database, file storage, server functions)
 - **Hosting**: Vercel
 - **Auth**: Passcode gate (no real auth system)
@@ -18,7 +18,7 @@ No bank API. Manual entry only. Live "remaining working balance" computed from i
 - **Passcode hashing**: `bcryptjs`
 - **Testing**: Vitest + `convex-test`
 
-Pinned versions: `next@16.1.6`, `react@19.2.3`, `convex@^1.32.0`, `tailwindcss@^4`, `vitest@^4`.
+Pinned versions: `next@16.1.6`, `react@19.2.3`, `convex@^1.32.0`, `vitest@^4`.
 
 ### Scripts
 
@@ -37,7 +37,7 @@ Pinned versions: `next@16.1.6`, `react@19.2.3`, `convex@^1.32.0`, `tailwindcss@^
 app/
   page.tsx                       # Gate: redirect to /dashboard or /unlock
   layout.tsx                     # Root layout: font, Convex, Auth, Actor, Theme providers
-  globals.css                    # Tailwind + design tokens + ported kit classes
+  globals.css                    # Reset + design tokens + ported kit classes
   error.tsx / global-error.tsx / not-found.tsx
   unlock/page.tsx                # PIN keypad (4-digit, 5 fails -> 30s lockout)
   dashboard/page.tsx             # Home: balance hero + analytics + recent
@@ -66,7 +66,6 @@ lib/
   types.ts              # Person, TxnType enums
   money.ts              # formatCents, parseMoneyToCents (cents <-> dollars)
   validation.ts         # validateIncome, validateExpense
-  dates.ts              # validateDateRange, getMonthBuckets (analytics)
   categories.ts         # name/color validation + normalization helpers
   display.ts            # PEOPLE, fmtDate, fmtDateTime, monthLabel, todayISO, daysAgoISO
   __tests__/            # money.test.ts, validation.test.ts
@@ -76,6 +75,7 @@ convex/
   categories.ts         # Category queries + mutations
   grocery.ts            # Grocery item queries + mutations
   groceryStores.ts      # Grocery store queries + mutations
+  namedEntity.ts        # Shared name/color validation for categories + stores
   dashboard.ts          # getDashboardAnalytics
   passcode.ts           # verifyPasscode action
   __tests__/            # transactions.test.ts
@@ -199,7 +199,7 @@ Indexes: `by_completed_createdAt`, `by_storeId`
 - `getDashboardAnalytics({ startDate?, endDate })` returns: `totalIncome`, `totalExpenses`, `transactionCount`, `pieChartData`, `monthlyBarChartData`, `topCategories`. Omitting `startDate` means "all time" (starts at the earliest dated active version).
 - UI ranges: 1M / 3M / 6M / ALL (`Analytics.tsx`), persisted in localStorage.
 - Pie chart aggregates expenses by category; slices below a 3% threshold collapse into "Other".
-- Monthly bar chart includes every month in the range (`lib/dates.ts` `getMonthBuckets`), showing income vs. expense.
+- Monthly bar chart includes every month in the range, showing income vs. expense.
 - Rendered by `Analytics` (stat tiles, CSS monthly bars, conic-gradient donut, top categories).
 
 ## Passcode Gate
@@ -218,7 +218,7 @@ Indexes: `by_completed_createdAt`, `by_storeId`
 
 Queries:
 - `getBalance()` -> `{ balanceCents, totalIncome, totalExpenses, count, series }` (active versions only; `series` = running balance sampled to <=24 points for the sparkline)
-- `listTransactions({ page?, pageSize?, sortField?, sortDirection?, categoryFilter?, typeFilter?, startDate?, endDate? })` -> `{ transactions, totalCount, totalPages, page, pageSize }` (newest-first default, joined with active version; sort by date/amount/category; default 25/page)
+- `listTransactions({ page?, pageSize?, sortField?, categoryFilter?, typeFilter? })` -> `{ transactions, totalCount, totalPages, page, pageSize }` (joined with active version; sort desc by `date` (default) or `amount`; default 25/page)
 - `getTransaction(transactionId)` -> container + active version
 - `listTransactionHistory(transactionId)` -> all versions, newest first
 - `getReceiptUrl(storageId)` -> signed URL

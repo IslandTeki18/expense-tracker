@@ -1,6 +1,10 @@
-@import "tailwindcss";
-
-@variant dark (&:where(.dark, .dark *));
+/* ponytail: minimal reset; Tailwind removed, no utilities were used */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border: 0 solid;
+}
 
 /* ============================================================================
    Tokens — ported from the Claude Design "Shared Ledger" system
@@ -83,11 +87,6 @@
 :root {
   --elev-3: 0 8px 24px -8px var(--shadow-color), 0 0 0 1px var(--border);
   --glow: 0 0 0 1px var(--accent), 0 0 16px -2px var(--accent-ghost);
-}
-
-@theme inline {
-  --color-background: var(--bg);
-  --color-foreground: var(--fg);
 }
 
 /* ============================================================================

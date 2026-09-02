@@ -1,37 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-
-const MAX_NAME_LENGTH = 30;
-const MAX_WORD_COUNT = 3;
-const HEX_COLOR_REGEX = /^#[0-9A-Fa-f]{6}$/;
-
-function normalizeName(input: string): string {
-  return input.trim().replace(/\s+/g, " ").toLowerCase();
-}
-
-function sanitizeDisplayName(input: string): string {
-  return input.trim().replace(/\s+/g, " ");
-}
-
-function assertValidName(name: string): void {
-  const sanitized = sanitizeDisplayName(name);
-  if (sanitized.length === 0) {
-    throw new Error("Category name is required.");
-  }
-  if (sanitized.length > MAX_NAME_LENGTH) {
-    throw new Error(`Category name must be ${MAX_NAME_LENGTH} characters or fewer.`);
-  }
-  const words = sanitized.split(" ").filter((w) => w.length > 0);
-  if (words.length > MAX_WORD_COUNT) {
-    throw new Error(`Category name must be ${MAX_WORD_COUNT} words or fewer.`);
-  }
-}
-
-function assertValidColor(color: string): void {
-  if (!HEX_COLOR_REGEX.test(color)) {
-    throw new Error("Color must be a valid hex color (e.g. #FF5733).");
-  }
-}
+import { assertValidColor, assertValidName, normalizeName, sanitizeDisplayName } from "./namedEntity";
 
 export const listCategories = query({
   args: {},
@@ -49,7 +18,7 @@ export const createCategory = mutation({
     color: v.string(),
   },
   handler: async (ctx, { nameDisplay, color }) => {
-    assertValidName(nameDisplay);
+    assertValidName(nameDisplay, "Category");
     assertValidColor(color);
 
     const sanitized = sanitizeDisplayName(nameDisplay);
@@ -91,7 +60,7 @@ export const updateCategory = mutation({
     };
 
     if (nameDisplay !== undefined) {
-      assertValidName(nameDisplay);
+      assertValidName(nameDisplay, "Category");
       const sanitized = sanitizeDisplayName(nameDisplay);
       const normalized = normalizeName(nameDisplay);
 
