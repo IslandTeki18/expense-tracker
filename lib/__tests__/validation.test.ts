@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateIncome, validateExpense } from "@/lib/validation";
+import { validateIncome, validateExpense, type ExpensePayload } from "@/lib/validation";
 
 describe("validateIncome", () => {
   const validPayload = {
@@ -182,7 +182,7 @@ describe("validateExpense", () => {
       enteredBy: null,
       description: "",
       spentBy: "nobody",
-    });
+    } as unknown as ExpensePayload);
     expect(result.valid).toBe(false);
     expect(Object.keys(result.errors).length).toBeGreaterThanOrEqual(5);
   });

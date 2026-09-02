@@ -19,7 +19,7 @@ export default defineSchema({
     createdAt: v.number(),
     createdBy: v.union(v.literal("landon"), v.literal("emma")),
     updatedAt: v.number(),
-  }).index("by_createdAt", ["createdAt"]),
+  }),
 
   grocery_stores: defineTable({
     nameDisplay: v.string(),

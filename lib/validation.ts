@@ -1,92 +1,53 @@
 import type { Person } from "@/lib/types";
 
 export interface IncomePayload {
-  amountCents: unknown;
-  entryDate: unknown;
-  enteredBy: unknown;
-  description?: unknown;
+  amountCents: number;
+  entryDate: string;
+  enteredBy: string;
+  description?: string;
 }
 
-export interface ExpensePayload {
-  amountCents: unknown;
-  entryDate: unknown;
-  enteredBy: unknown;
-  description: unknown;
-  spentBy: unknown;
+export interface ExpensePayload extends IncomePayload {
+  description: string;
+  spentBy: string;
 }
 
-export type ValidationResult =
-  | { valid: true; errors: Record<string, never> }
-  | { valid: false; errors: Record<string, string> };
+export interface ValidationResult {
+  valid: boolean;
+  errors: Record<string, string>;
+}
 
-const VALID_PERSONS: Person[] = ["landon", "emma"];
+const VALID_PERSONS: string[] = ["landon", "emma"] satisfies Person[];
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
-function validateAmountCents(
-  value: unknown,
-  errors: Record<string, string>,
-): void {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
+function baseErrors(p: IncomePayload): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (typeof p.amountCents !== "number" || !Number.isFinite(p.amountCents)) {
     errors.amountCents = "Amount is required and must be a number.";
-  } else if (!Number.isInteger(value) || value <= 0) {
+  } else if (!Number.isInteger(p.amountCents) || p.amountCents <= 0) {
     errors.amountCents = "Amount must be a positive integer.";
   }
-}
-
-function validateEntryDate(
-  value: unknown,
-  errors: Record<string, string>,
-): void {
-  if (typeof value !== "string" || !DATE_REGEX.test(value)) {
+  if (typeof p.entryDate !== "string" || !DATE_REGEX.test(p.entryDate)) {
     errors.entryDate = "Entry date is required and must be YYYY-MM-DD.";
   }
-}
-
-function validatePerson(
-  field: string,
-  value: unknown,
-  errors: Record<string, string>,
-): void {
-  if (
-    typeof value !== "string" ||
-    !VALID_PERSONS.includes(value as Person)
-  ) {
-    errors[field] = `${field} must be "landon" or "emma".`;
+  if (!VALID_PERSONS.includes(p.enteredBy)) {
+    errors.enteredBy = 'enteredBy must be "landon" or "emma".';
   }
-}
-
-function buildResult(errors: Record<string, string>): ValidationResult {
-  if (Object.keys(errors).length === 0) {
-    return { valid: true, errors: {} as Record<string, never> };
-  }
-  return { valid: false, errors };
+  return errors;
 }
 
 export function validateIncome(payload: IncomePayload): ValidationResult {
-  const errors: Record<string, string> = {};
-
-  validateAmountCents(payload.amountCents, errors);
-  validateEntryDate(payload.entryDate, errors);
-  validatePerson("enteredBy", payload.enteredBy, errors);
-
-  return buildResult(errors);
+  const errors = baseErrors(payload);
+  return { valid: Object.keys(errors).length === 0, errors };
 }
 
 export function validateExpense(payload: ExpensePayload): ValidationResult {
-  const errors: Record<string, string> = {};
-
-  validateAmountCents(payload.amountCents, errors);
-  validateEntryDate(payload.entryDate, errors);
-  validatePerson("enteredBy", payload.enteredBy, errors);
-
-  if (
-    typeof payload.description !== "string" ||
-    payload.description.trim() === ""
-  ) {
+  const errors = baseErrors(payload);
+  if (typeof payload.description !== "string" || payload.description.trim() === "") {
     errors.description = "Description is required.";
   }
-
-  validatePerson("spentBy", payload.spentBy, errors);
-
-  return buildResult(errors);
+  if (!VALID_PERSONS.includes(payload.spentBy)) {
+    errors.spentBy = 'spentBy must be "landon" or "emma".';
+  }
+  return { valid: Object.keys(errors).length === 0, errors };
 }

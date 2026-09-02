@@ -1,8 +1,7 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
-import { loadLookups } from "./transactions";
+import { assertValidDate, loadLookups } from "./transactions";
 
-const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const SMALL_CATEGORY_THRESHOLD = 0.03; // 3% of total expenses
 
 export const getDashboardAnalytics = query({
@@ -12,12 +11,8 @@ export const getDashboardAnalytics = query({
   },
   handler: async (ctx, args) => {
     const endDate = args.endDate;
-    if (args.startDate !== undefined && !DATE_REGEX.test(args.startDate)) {
-      throw new Error("startDate must be YYYY-MM-DD.");
-    }
-    if (!DATE_REGEX.test(endDate)) {
-      throw new Error("endDate must be YYYY-MM-DD.");
-    }
+    if (args.startDate !== undefined) assertValidDate(args.startDate);
+    assertValidDate(endDate);
 
     const allTransactions = await ctx.db.query("transactions").collect();
     const { versionById, categoryById } = await loadLookups(ctx);

@@ -7,7 +7,7 @@ function assertPositiveCents(amount: number): void {
   }
 }
 
-function assertValidDate(date: string): void {
+export function assertValidDate(date: string): void {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     throw new Error("entryDate must be in YYYY-MM-DD format");
   }

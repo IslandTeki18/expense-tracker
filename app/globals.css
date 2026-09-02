@@ -27,7 +27,6 @@
   --gt-signal-deep: #0d74ce;
   --gt-signal-ghost: rgba(0, 144, 255, 0.12);
   --gt-lime: #adfa1d;
-  --gt-warn: #f59e0b;
 
   --font-ledger: var(--font-space-mono, "Space Mono"), ui-monospace, monospace;
   --radius-xs: 2px;
@@ -56,7 +55,6 @@
   --accent-press: #0b5fa5;
   --accent-ghost: var(--gt-signal-ghost);
   --highlight: #65a30d;
-  --highlight-soft: rgba(101, 163, 13, 0.12);
   --danger: #dc2626;
   --shadow-color: rgba(10, 10, 10, 0.1);
   --emma: #7c3aed;
@@ -78,7 +76,6 @@
   --accent-press: var(--gt-signal-deep);
   --accent-ghost: var(--gt-signal-ghost);
   --highlight: var(--gt-lime);
-  --highlight-soft: rgba(173, 250, 29, 0.14);
   --danger: #f87171;
   --shadow-color: rgba(0, 0, 0, 0.6);
   --emma: #a78bfa;

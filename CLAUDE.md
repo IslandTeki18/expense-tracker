@@ -120,7 +120,7 @@ Container for a logical transaction. Versions change over time.
 | createdBy | Person | |
 | updatedAt | number (ms epoch) | |
 
-Indexes: `by_createdAt`
+Indexes: none (queries collect the whole table)
 
 ### Table: `transaction_versions`
 

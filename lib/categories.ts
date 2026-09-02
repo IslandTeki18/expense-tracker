@@ -1,16 +1,8 @@
 const MAX_NAME_LENGTH = 30;
 const MAX_WORD_COUNT = 3;
 
-export function collapseSpaces(input: string): string {
-  return input.replace(/\s+/g, " ");
-}
-
-export function normalizeCategoryName(input: string): string {
-  return collapseSpaces(input.trim()).toLowerCase();
-}
-
 export function sanitizeCategoryDisplayName(input: string): string {
-  return collapseSpaces(input.trim());
+  return input.trim().replace(/\s+/g, " ");
 }
 
 export function validateCategoryName(name: string): {
