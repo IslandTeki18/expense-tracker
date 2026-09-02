@@ -146,11 +146,8 @@ export const deleteItem = mutation({
     itemId: v.id("grocery_items"),
   },
   handler: async (ctx, { itemId }) => {
-    const item = await ctx.db.get(itemId);
-    if (!item) {
-      throw new Error("Item not found.");
-    }
-    await ctx.db.delete(itemId);
+    // Idempotent: a double tap before the list refreshes must not throw.
+    if (await ctx.db.get(itemId)) await ctx.db.delete(itemId);
   },
 });
 
