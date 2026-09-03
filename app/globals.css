@@ -1246,23 +1246,7 @@ textarea {
 .gt-brand-mark {
   width: 34px;
   height: 34px;
-  border: 1.5px solid var(--accent);
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 11px;
-  color: var(--accent);
-  position: relative;
-}
-.gt-brand-tick {
-  position: absolute;
-  top: -1px;
-  right: -1px;
-  width: 6px;
-  height: 6px;
-  background: var(--highlight);
+  color: var(--fg);
 }
 .gt-brand-word {
   font-size: 13px;

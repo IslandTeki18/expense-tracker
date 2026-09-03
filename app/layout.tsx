@@ -15,6 +15,7 @@ const spaceMono = Space_Mono({
 export const metadata: Metadata = {
   title: "Shared Ledger",
   description: "Track shared income and expenses for one bank account",
+  icons: { icon: "/favicon.svg", apple: "/mark-dark.svg" },
 };
 
 export const viewport: Viewport = {

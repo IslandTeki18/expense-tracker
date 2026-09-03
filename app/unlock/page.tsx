@@ -104,9 +104,12 @@ export default function UnlockPage() {
   return (
     <main className="m-page" style={{ display: "flex", flexDirection: "column", paddingBottom: 30 }}>
       <div className="gt-brand" style={{ marginTop: 18 }}>
-        <div className="gt-brand-mark">
-          L&amp;E<span className="gt-brand-tick" />
-        </div>
+        <svg className="gt-brand-mark" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <rect x="4" y="4" width="56" height="56" rx="8" stroke="currentColor" strokeWidth="3" />
+          <path d="M32 4v56" stroke="currentColor" strokeWidth="3" />
+          <path d="M13 42h38" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" />
+          <rect x="42" y="14" width="8" height="8" rx="1.5" fill="var(--highlight)" />
+        </svg>
         <div className="gt-brand-word">
           SHARED<span style={{ color: "var(--accent)" }}>/</span>LEDGER
         </div>
