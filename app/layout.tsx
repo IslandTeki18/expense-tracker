@@ -16,6 +16,15 @@ export const metadata: Metadata = {
   title: "Shared Ledger",
   description: "Track shared income and expenses for one bank account",
   icons: { icon: "/favicon.svg", apple: "/mark-dark.svg" },
+  appleWebApp: {
+    capable: true,
+    title: "Shared Ledger",
+    // "default" (not black-translucent): .m-page has no top safe-area inset.
+    statusBarStyle: "default",
+  },
+  // Next 16 only emits the modern `mobile-web-app-capable`; iOS < 17.4 still
+  // needs the apple-prefixed one to launch standalone.
+  other: { "apple-mobile-web-app-capable": "yes" },
 };
 
 export const viewport: Viewport = {
