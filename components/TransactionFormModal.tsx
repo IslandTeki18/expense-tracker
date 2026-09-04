@@ -144,21 +144,19 @@ export default function TransactionFormModal({ mode, onClose, editData }: Transa
           </div>
         )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-          <Field
-            label="AMOUNT"
-            icon={<DollarSign size={15} />}
-            inputMode="decimal"
-            placeholder="0.00"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            error={fieldErrors.amountCents}
-            autoFocus={!isEdit}
-          />
-          <Field label="DATE" error={fieldErrors.entryDate}>
-            <input className="gt-field-input" type="date" value={entryDate} onChange={(e) => setEntryDate(e.target.value)} />
-          </Field>
-        </div>
+        <Field
+          label="AMOUNT"
+          icon={<DollarSign size={15} />}
+          inputMode="decimal"
+          placeholder="0.00"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          error={fieldErrors.amountCents}
+          autoFocus={!isEdit}
+        />
+        <Field label="DATE" error={fieldErrors.entryDate}>
+          <input className="gt-field-input" type="date" value={entryDate} onChange={(e) => setEntryDate(e.target.value)} />
+        </Field>
 
         <Field
           label={isExpense ? "DESCRIPTION" : "DESCRIPTION (OPTIONAL)"}
