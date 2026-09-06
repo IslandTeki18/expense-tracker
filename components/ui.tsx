@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ReactNode, type InputHTMLAttributes } from "react";
+import { useEffect, useRef, useState, type ReactNode, type InputHTMLAttributes } from "react";
 import { Check, X, Trash2 } from "lucide-react";
 import { PEOPLE, PERSON_IDS } from "@/lib/display";
 import type { Person } from "@/lib/types";
@@ -172,6 +172,12 @@ export function Modal({
   children: ReactNode;
   footer?: ReactNode;
 }) {
+  const bodyRef = useRef<HTMLDivElement>(null);
+  // On mobile the on-screen keyboard shrinks the visual viewport but not the
+  // layout viewport, so a `position: fixed` sheet ends up hidden behind it.
+  // Track the visual viewport and pin the overlay to it instead.
+  const [viewport, setViewport] = useState<{ height: number; top: number } | null>(null);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -180,8 +186,38 @@ export function Modal({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const sync = () => setViewport({ height: vv.height, top: vv.offsetTop });
+    sync();
+    vv.addEventListener("resize", sync);
+    vv.addEventListener("scroll", sync);
+    return () => {
+      vv.removeEventListener("resize", sync);
+      vv.removeEventListener("scroll", sync);
+    };
+  }, []);
+
+  // Keep the focused control visible once the sheet has been resized.
+  useEffect(() => {
+    const body = bodyRef.current;
+    if (!body) return;
+    const onFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target?.scrollIntoView) return;
+      requestAnimationFrame(() => target.scrollIntoView({ block: "nearest" }));
+    };
+    body.addEventListener("focusin", onFocusIn);
+    return () => body.removeEventListener("focusin", onFocusIn);
+  }, []);
+
   return (
-    <div className="gt-overlay" onClick={onClose}>
+    <div
+      className="gt-overlay"
+      onClick={onClose}
+      style={viewport ? { height: viewport.height, top: viewport.top, bottom: "auto" } : undefined}
+    >
       <div className="gt-modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
         <div className="gt-modal-head">
           <div>
@@ -196,7 +232,9 @@ export function Modal({
             <X size={15} />
           </button>
         </div>
-        <div className="gt-modal-body">{children}</div>
+        <div className="gt-modal-body" ref={bodyRef}>
+          {children}
+        </div>
         {footer && <div className="gt-modal-foot">{footer}</div>}
       </div>
     </div>
