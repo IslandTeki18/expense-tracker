@@ -1177,7 +1177,9 @@ textarea {
   box-shadow: var(--elev-3);
   width: 100%;
   max-width: 560px;
-  max-height: 88dvh;
+  /* 100% keeps the sheet inside the overlay when it is pinned to the visual
+     viewport (i.e. when the on-screen keyboard is open). */
+  max-height: min(88dvh, 100%);
   display: flex;
   flex-direction: column;
   overflow: hidden;
