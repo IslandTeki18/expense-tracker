@@ -37,8 +37,30 @@ def clean_loc(loc, desc):
         if w[:n] == w[n:2*n]: w = w[:n] + w[2*n:]; break
     return " ".join(w)[:60]
 
+def layout_text(path):
+    """pdftotext -layout equivalent, so statement PDFs can be fed in directly."""
+    import pymupdf
+    RULE = re.compile(r"_{3,}")
+    lines = []
+    for page in pymupdf.open(path):
+        rows = collections.defaultdict(list)
+        for x0, y0, _x1, _y1, w, *_ in page.get_text("words"):
+            rows[round(y0 / 3.0)].append((x0, w))
+        for key in sorted(rows):
+            ln = ""
+            for x0, w in sorted(rows[key]):
+                col = int(round(x0 / 4.8))                       # statement is monospaced at ~4.8pt/char
+                if col < len(ln): col = len(ln) + 1
+                ln += " " * (col - len(ln)) + w
+            ln = ln.rstrip()
+            if "|" not in ln and RULE.search(ln):                # section heading: drop its rule, undo the indent
+                ln = re.sub(r"\s+", " ", RULE.sub(" ", ln)).strip()
+                ln = re.sub(r"^SUFFIX\s+", "SUFFIX      ", ln)
+            lines.append(ln)
+    return "\n".join(lines)
+
 def parse(path):
-    txt = open(path).read()
+    txt = layout_text(path) if path.lower().endswith(".pdf") else open(path).read()
     # checking summary column: the 009 column is the one with WITHDRAWALS count > 1
     sums = [(k, int(n), cents(a)) for k, n, a in SUMMARY.findall(txt)]
     chk = txt.split("SUFFIX      009 CHECKING", 1)[1]
@@ -72,12 +94,23 @@ def q(path, args, kind="query"):
         print("retry", attempt, r.get("errorMessage")); import time; time.sleep(2 ** attempt)
     raise SystemExit(r)
 
-existing = [(t["type"], t["entryDate"], t["amountCents"], t["description"]) for t in q("transactions:listTransactions", {"pageSize": 5000})["transactions"]]
+_existing = None
+def existing():
+    global _existing
+    if _existing is None:
+        try:
+            _existing = [(t["type"], t["entryDate"], t["amountCents"], t["description"]) for t in q("transactions:listTransactions", {"pageSize": 5000})["transactions"]]
+        except SystemExit:
+            if not DRY: raise
+            print("WARNING: deployment unreachable; listing every parsed row without dedup")
+            _existing = []
+    return _existing
 def day(s): return datetime.date.fromisoformat(s).toordinal()
 def claim(r):
-    for i, e in enumerate(existing):
+    rows = existing()
+    for i, e in enumerate(rows):
         if e[0] == r["type"] and e[2] == r["amountCents"] and abs(day(e[1]) - day(r["entryDate"])) <= WINDOW:
-            existing.pop(i); return e
+            rows.pop(i); return e
     return None
 todo = []
 for f in sys.argv[1:]:
